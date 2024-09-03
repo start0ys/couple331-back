@@ -15,7 +15,7 @@ public class User extends Auditable {
     private Long userId;
     private String email;
     private String password;
-    private String desc;
+    private String userDesc;
     private String name;
     private String status;
     private String salt;

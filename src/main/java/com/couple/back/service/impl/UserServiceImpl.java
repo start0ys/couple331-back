@@ -12,7 +12,7 @@ import com.couple.back.service.UserService;
 public class UserServiceImpl implements UserService{
     
     @Autowired
-    UserMapper userMapper;
+    private UserMapper userMapper;
     
     public User registerUser(User user) throws Exception {
         if(user == null) return null;
@@ -27,7 +27,7 @@ public class UserServiceImpl implements UserService{
             return null;
 
         
-        userMapper.saveUser(user);
+        userMapper.insertData(user);
 
         return user;
     }

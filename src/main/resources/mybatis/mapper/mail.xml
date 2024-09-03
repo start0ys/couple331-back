@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.couple.back.mybatis.MailMapper">
+    <insert id="insertData" parameterType="com.couple.back.model.MailRequest" >
+		INSERT INTO temporary_verification_codes(email, verification_code)
+		VALUES (#{email}, #{verificationCode});
+	</insert>
+
+	<delete id="deleteData" parameterType="com.couple.back.model.MailRequest" >
+		DELETE FROM temporary_verification_codes
+		WHERE email = #{email}
+		AND verification_code = #{verificationCode}
+	</delete>
+
+	<select id="selectCountByVerificationCode" parameterType="com.couple.back.model.MailRequest" resultType="int" >
+		SELECT 
+			count(verification_code)
+		FROM temporary_verification_codes 
+		WHERE email = #{email}
+		AND verification_code = #{verificationCode}
+	</select>
+</mapper>

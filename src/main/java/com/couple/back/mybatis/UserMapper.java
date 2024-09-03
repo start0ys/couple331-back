@@ -8,8 +8,8 @@ import com.couple.back.model.User;
 @Mapper
 @Repository
 public interface UserMapper {
-    public void saveUser(User user);
-    public User getUserByEmail(String email);
-    public int emailCheck(String email);
-    public void updateUserByEmail(User user);
+    public void insertData(User user);
+    public User selectDataByEmail(String email);
+    public int selectCountByEmail(String email);
+    public void updateDataByEmail(User user);
 }

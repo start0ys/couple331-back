@@ -8,5 +8,7 @@ import lombok.Setter;
 @Setter
 public abstract class Auditable {
     private LocalDateTime createDateTime;
+    private Long createUserId;
     private LocalDateTime updateDateTime;
+    private Long updateUserId;
 }
