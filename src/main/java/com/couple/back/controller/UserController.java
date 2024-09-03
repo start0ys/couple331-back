@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.couple.back.common.ApiResponse;
+import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.model.User;
 import com.couple.back.service.UserService;
 
@@ -23,36 +25,32 @@ public class UserController {
     private UserService userService;
     
     @PostMapping("/register")
-    public ResponseEntity<User> register(@RequestBody User saveData) {
-        ResponseEntity<User> rs = null;
-
+    public ResponseEntity<ApiResponse<User>> register(@RequestBody User saveData) {
         try {
             User user = userService.registerUser(saveData);
-            if(user != null) {
-                rs = new ResponseEntity<User>(user, HttpStatus.OK);
-            } else {
-                rs = new ResponseEntity<User>(HttpStatus.BAD_REQUEST);    
+            if(user == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail("실패하였습니다."),HttpStatus.BAD_REQUEST);   
             }
+            return new ResponseEntity<>(ApiResponseUtil.success("성공하였습니다.", user), HttpStatus.OK);
         } catch (Exception e) {
-            rs = new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(ApiResponseUtil.error("오류가 발생하였습니다."),HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<User>> getUser(@PathVariable Long userId) {
         // 사용자 정보 조회
         return null;
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<?> updateUser(@PathVariable Long userId, @RequestBody User saveData) {
+    public ResponseEntity<ApiResponse<User>> updateUser(@PathVariable Long userId, @RequestBody User saveData) {
         // 사용자 정보 수정
         return null;
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<String> deleteUser(@PathVariable Long userId) {
+    public ResponseEntity<ApiResponse<User>> deleteUser(@PathVariable Long userId) {
         // 사용자 삭제
         return null;
     }
