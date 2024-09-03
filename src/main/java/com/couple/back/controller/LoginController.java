@@ -1,42 +1,43 @@
 package com.couple.back.controller;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.couple.back.model.User;
+import com.couple.back.service.LoginService;
 
 
 @RestController
 @RequestMapping("/auth")
 public class LoginController {
+
+    @Autowired
+    private LoginService loginService;
     
-    @GetMapping("/")
-	public ResponseEntity<Map<String, Object>> test() throws Exception {
-		ResponseEntity<Map<String, Object>> rs = null;
+	@PostMapping("/login")
+    public ResponseEntity<Map<String, Object>> login(@RequestBody User loginData) {
+        ResponseEntity<Map<String, Object>> rs = null;
 
 		try{
-            Map<String, Object> result = new HashMap<String, Object>();
-            result.put("result", "test");
-            rs = new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+			if (loginData != null) {
+				Map<String, Object> result = loginService.loginUser(loginData);
+				if (result != null) {
+					rs = new ResponseEntity<Map<String, Object>>(result, HttpStatus.OK);
+				}
+			}
+			if (rs == null)
+                rs = new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
-			e.printStackTrace();
 			rs = new ResponseEntity<Map<String, Object>>(HttpStatus.BAD_REQUEST);
 		}
 		return rs;
-	}
-
-	@PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User user) {
-        // 로그인 로직
-		return null;
     }
 
     @PostMapping("/logout")

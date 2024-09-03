@@ -1,5 +1,7 @@
 package com.couple.back.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,14 +13,29 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.couple.back.model.User;
+import com.couple.back.service.UserService;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
+
+    @Autowired
+    private UserService userService;
     
     @PostMapping("/register")
     public ResponseEntity<User> register(@RequestBody User saveData) {
-        // 회원가입 로직
+        ResponseEntity<User> rs = null;
+
+        try {
+            User user = userService.registerUser(saveData);
+            if(user != null) {
+                rs = new ResponseEntity<User>(user, HttpStatus.OK);
+            } else {
+                rs = new ResponseEntity<User>(HttpStatus.BAD_REQUEST);    
+            }
+        } catch (Exception e) {
+            rs = new ResponseEntity<User>(HttpStatus.BAD_REQUEST);
+        }
         return null;
     }
 

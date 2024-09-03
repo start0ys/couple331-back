@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.couple.back.mybatis.UserMapper">
+	<insert id="saveUser" parameterType="com.study.figure.dto.User" >
+		INSERT INTO users(email, password, j_desc, name, status, create_date_time, salt)
+		VALUES (#{email}, #{password}, #{desc}, #{name}, '01', now(), #{salt});
+	</insert>
+
+	<select id="getUserByEmail" parameterType="String" resultType="com.study.figure.dto.User" >
+		SELECT 
+			user_id as "userId", 
+			email, 
+			password, 
+			j_desc as "desc", 
+			name, 
+			status, 
+			salt,
+			create_date_time as "createDateTime", 
+			update_date_time as "updateDateTime"
+		FROM users WHERE email = #{email};
+	</select>
+
+	<select id="emailCheck" parameterType="String" resultType="int" >
+		SELECT 
+			count(email)
+		FROM users WHERE email = #{email};
+	</select>
+
+	<update id="updateUserByEmail" parameterType="com.study.figure.dto.User">
+		UPDATE users
+		SET 
+			<if test="password != null and password != ''">password=#{password},</if>
+			<if test="desc != null and desc != ''">j_desc=#{desc},</if>
+			<if test="status != null and status != ''">status=#{status},</if>
+			<if test="salt != null and salt != ''">salt=#{salt},</if>
+			update_date_time = now()
+		WHERE email = #{email};
+	</update>
+</mapper>
