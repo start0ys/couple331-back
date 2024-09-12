@@ -13,7 +13,6 @@ public class Couple extends Auditable {
     private Long coupleId;
     private Long manId;
     private Long womanId;
-    private String state;
     private String coupleDesc;
     private LocalDateTime startDate;
 }

@@ -4,7 +4,6 @@ package com.couple.back.model;
 import org.apache.commons.lang3.StringUtils;
 
 import com.couple.back.common.Auditable;
-import com.couple.back.common.CommonConstants.GenderType;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -22,12 +21,24 @@ public class User extends Auditable {
     private String gender;
     private Long coupleId;
 
+    public enum GenderType {Man, Woman};
+
     public boolean validation(boolean isCreate) {
         return StringUtils.isAnyEmpty(this.email, this.password, this.salt, this.gender) || (isCreate && StringUtils.isEmpty(this.name));
     }
 
     public GenderType getGender() {
-        return StringUtils.equals(this.gender, "01") ? GenderType.Man : GenderType.Woman;
+        if(StringUtils.isEmpty(this.gender)) 
+            return null;
+
+        switch (this.gender) {
+            case "01":
+                return GenderType.Man;
+            case "02":
+                return GenderType.Woman;
+            default:
+                return null;
+        }
     }
 
 }
