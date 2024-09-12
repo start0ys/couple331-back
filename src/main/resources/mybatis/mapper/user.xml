@@ -11,13 +11,35 @@
 			user_id as "userId", 
 			email, 
 			password, 
-			j_desc as "desc", 
+			user_desc as "userDesc", 
 			name, 
 			status, 
 			salt,
-			create_date_time as "createDateTime", 
-			update_date_time as "updateDateTime"
+			gender,
+			couple_id as "coupleId",
+			create_date_time as "createDateTime",
+			create_user_id as "createUserId", 
+			update_date_time as "updateDateTime",
+			update_user_id as "updateUserId"
 		FROM users WHERE email = #{email};
+	</select>
+
+	<select id="selectDataByUserId" parameterType="String" resultType="com.couple.back.model.User" >
+		SELECT 
+			user_id as "userId", 
+			email, 
+			password, 
+			user_desc as "userDesc", 
+			name, 
+			status, 
+			salt,
+			gender,
+			couple_id as "coupleId",
+			create_date_time as "createDateTime",
+			create_user_id as "createUserId", 
+			update_date_time as "updateDateTime",
+			update_user_id as "updateUserId"
+		FROM users WHERE user_id = #{userId};
 	</select>
 
 	<select id="selectCountByEmail" parameterType="String" resultType="int" >

@@ -40,8 +40,15 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<ApiResponse<User>> getUser(@PathVariable Long userId) {
-        // 사용자 정보 조회
-        return null;
+        try {
+            User user = userService.getUser(userId);
+            if(user == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, user), HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{userId}")

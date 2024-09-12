@@ -31,4 +31,10 @@ public class UserServiceImpl implements UserService{
 
         return user;
     }
+
+    public User getUser(Long userId) throws Exception{
+        if(userId == null) return null;
+
+        return userMapper.selectDataByUserId(userId);
+    }
 }
