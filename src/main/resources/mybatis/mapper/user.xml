@@ -24,7 +24,7 @@
 		FROM users WHERE email = #{email};
 	</select>
 
-	<select id="selectDataByUserId" parameterType="String" resultType="com.couple.back.model.User" >
+	<select id="selectDataByUserId" parameterType="Long" resultType="com.couple.back.model.User" >
 		SELECT 
 			user_id as "userId", 
 			email, 
