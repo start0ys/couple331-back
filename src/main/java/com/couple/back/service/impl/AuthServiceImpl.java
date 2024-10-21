@@ -32,7 +32,8 @@ public class AuthServiceImpl implements AuthService{
     private RedisUtil redisUtil;
 
     public AuthCodeStatus sendCode(MailAuthRequest mailAuthRequest) throws Exception {
-        if(mailAuthRequest.isEmailEmpty()) return AuthCodeStatus.FAIL;
+        if(mailAuthRequest.isEmailEmpty()) 
+        throw new IllegalArgumentException("Email Not Find");
         String email = mailAuthRequest.getEmail();
         
         int mailCheck = userMapper.selectCountByEmail(email);
