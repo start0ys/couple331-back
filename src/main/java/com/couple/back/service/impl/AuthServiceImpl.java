@@ -30,10 +30,12 @@ public class AuthServiceImpl implements AuthService{
 
     @Autowired
     private RedisUtil redisUtil;
+    
+    private final int AUTH_CODE_EXPIRATION_TIME = 180;
 
     public AuthCodeStatus sendCode(MailAuthRequest mailAuthRequest) throws Exception {
         if(mailAuthRequest.isEmailEmpty()) 
-        throw new IllegalArgumentException("Email Not Find");
+            throw new IllegalArgumentException("Email Not Find");
         String email = mailAuthRequest.getEmail();
         
         int mailCheck = userMapper.selectCountByEmail(email);
@@ -43,7 +45,7 @@ public class AuthServiceImpl implements AuthService{
             String authCode =  getAuthCode();
             ResultStatus result = mailUtil.sendHtmlMail(email, "Couple331 회원가입 인증", getAuthCodeHtmlStr(authCode));
             if(result == ResultStatus.SUCCESS) {
-                // TODO Redis에 저장
+                redisUtil.setDataExpire(email, authCode, AUTH_CODE_EXPIRATION_TIME);
                 return AuthCodeStatus.SUCCESS;
             } else {
                 return AuthCodeStatus.FAIL;
@@ -80,11 +82,17 @@ public class AuthServiceImpl implements AuthService{
     }
 
     public ResultStatus verifyCode(MailAuthRequest mailAuthRequest) throws Exception {
-        if(mailAuthRequest.validation()) return null;
+        if(mailAuthRequest.validation()) 
+            throw new IllegalArgumentException("Parameter is Empty");
 
-        int authCodeCheck = 1; // TODO Redis값 과 체크
+        String authCode = redisUtil.getData(mailAuthRequest.getEmail());
        
-        return authCodeCheck > 0 ? ResultStatus.SUCCESS : ResultStatus.FAIL;
+        if(StringUtils.equals(authCode, mailAuthRequest.getAuthCode())) {
+            redisUtil.deleteData(mailAuthRequest.getEmail());
+            return ResultStatus.SUCCESS;
+        } else {
+            return ResultStatus.FAIL;
+        }
     }
 
     public ApiResponse<String> loginUser(User loginData) throws Exception {

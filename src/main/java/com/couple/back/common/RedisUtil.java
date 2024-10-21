@@ -26,6 +26,10 @@ public class RedisUtil {
         Duration expireDuration = Duration.ofSeconds(duration);  
         valueOperations.set(key, value, expireDuration);  
     }  
+
+    public void setData(String key, String value) {
+        template.opsForValue().set(key, value);
+    }
   
     public void deleteData(String key) {  
         template.delete(key);  

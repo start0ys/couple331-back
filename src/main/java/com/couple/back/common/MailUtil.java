@@ -15,17 +15,23 @@ public class MailUtil {
 
     @Value("${couple331.mail.password}")
     private String coupleMailPassword;
+	
+	@Value("${couple331.mail.host}")
+    private String coupleMailHost;
+
+	@Value("${couple331.mail.port}")
+    private String coupleMailHostPort;
 
 
     public ResultStatus sendHtmlMail(String email, String subject, String htmlString) throws Exception {
-        if(StringUtils.isAnyEmpty(coupleMail, coupleMailPassword, email, htmlString)) 
+        if(StringUtils.isAnyEmpty(coupleMail, coupleMailPassword, email, htmlString, coupleMailHost, coupleMailHostPort)) 
             return ResultStatus.FAIL;
 		
 		HtmlEmail mail = new HtmlEmail();
 
 		mail.setCharset("euc-kr"); // 한글 인코딩
-		mail.setHostName("smtp.gmail.com"); //SMTP서버 설정
-		mail.setSmtpPort(465); //SMPT서버 포트번호
+		mail.setHostName(coupleMailHost); //SMTP서버 설정
+		mail.setSmtpPort(Integer.parseInt(coupleMailHostPort)); //SMPT서버 포트번호
 		
 		mail.setAuthentication(coupleMail, coupleMailPassword);
 		mail.setSSLOnConnect(true);
