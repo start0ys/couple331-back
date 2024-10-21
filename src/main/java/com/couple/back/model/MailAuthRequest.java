@@ -9,16 +9,18 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class MailRequest {
+public class MailAuthRequest {
     private String email;
-    private String verificationCode;
+    private String authCode;
+
+    public enum AuthCodeStatus {SUCCESS, FAIL, ALREADY_EXISTS}
 
     public boolean isEmailEmpty() {
         return StringUtils.isEmpty(this.email);
     }
 
     public boolean validation() {
-        return StringUtils.isAnyEmpty(this.email, this.verificationCode);
+        return StringUtils.isAnyEmpty(this.email, this.authCode);
     }
 
 }

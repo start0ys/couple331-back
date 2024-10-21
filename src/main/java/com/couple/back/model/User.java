@@ -21,7 +21,7 @@ public class User extends Auditable {
     private String gender;
     private Long coupleId;
 
-    public enum GenderType {Man, Woman};
+    public enum GenderType {MAN, WOMAN};
 
     public boolean validation(boolean isCreate) {
         return StringUtils.isAnyEmpty(this.email, this.password, this.salt, this.gender) || (isCreate && StringUtils.isEmpty(this.name));
@@ -33,9 +33,9 @@ public class User extends Auditable {
 
         switch (this.gender) {
             case "01":
-                return GenderType.Man;
+                return GenderType.MAN;
             case "02":
-                return GenderType.Woman;
+                return GenderType.WOMAN;
             default:
                 return null;
         }
