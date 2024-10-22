@@ -13,8 +13,6 @@ public class MailAuthRequest {
     private String email;
     private String authCode;
 
-    public enum AuthCodeStatus {SUCCESS, FAIL, ALREADY_EXISTS}
-
     public boolean isEmailEmpty() {
         return StringUtils.isEmpty(this.email);
     }

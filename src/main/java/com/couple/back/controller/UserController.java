@@ -16,6 +16,7 @@ import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
 import com.couple.back.model.User;
+import com.couple.back.service.AuthService;
 import com.couple.back.service.UserService;
 
 @RestController
@@ -24,15 +25,25 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private AuthService authService;
     
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<User>> register(@RequestBody User saveData) {
         try {
+
+            if(saveData != null && !authService.verifiedEmailCheck(saveData.getEmail())) {
+                return new ResponseEntity<>(ApiResponseUtil.fail("인증되지 않은 이메일입니다."),HttpStatus.BAD_REQUEST);
+            }
+
             User user = userService.registerUser(saveData);
             if(user == null) {
                 return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
             }
             return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, user), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -46,6 +57,8 @@ public class UserController {
                 return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
             }
             return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, user), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }

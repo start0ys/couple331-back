@@ -27,7 +27,7 @@ public class User extends Auditable {
         return StringUtils.isAnyEmpty(this.email, this.password, this.salt, this.gender) || (isCreate && StringUtils.isEmpty(this.name));
     }
 
-    public GenderType getGender() {
+    public GenderType getGenderType() {
         if(StringUtils.isEmpty(this.gender)) 
             return null;
 

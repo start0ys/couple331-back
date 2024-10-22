@@ -15,7 +15,8 @@ public class UserServiceImpl implements UserService{
     private UserMapper userMapper;
     
     public User registerUser(User user) throws Exception {
-        if(user == null) return null;
+        if(user == null) 
+            throw new IllegalArgumentException("Parameter is Empty");
 
         String salt = SHA256.getSalt();
 
@@ -26,6 +27,8 @@ public class UserServiceImpl implements UserService{
         if(user.validation(true)) 
             return null;
 
+        user.setStatus("01");
+
         
         userMapper.insertData(user);
 
@@ -33,7 +36,8 @@ public class UserServiceImpl implements UserService{
     }
 
     public User getUser(Long userId) throws Exception{
-        if(userId == null) return null;
+        if(userId == null) 
+            throw new IllegalArgumentException("Parameter is Empty");
 
         return userMapper.selectDataByUserId(userId);
     }
