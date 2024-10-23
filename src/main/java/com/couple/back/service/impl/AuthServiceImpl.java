@@ -1,6 +1,9 @@
 package com.couple.back.service.impl;
 
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,10 +12,13 @@ import org.springframework.stereotype.Service;
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.common.CommonUtil;
+import com.couple.back.common.JwtUtil;
 import com.couple.back.common.CommonConstants.ResultStatus;
 import com.couple.back.common.MailUtil;
 import com.couple.back.common.RedisUtil;
 import com.couple.back.common.SHA256;
+import com.couple.back.model.JwtTokenRequest;
 import com.couple.back.model.MailAuthRequest;
 import com.couple.back.model.User;
 import com.couple.back.mybatis.UserMapper;
@@ -29,10 +35,14 @@ public class AuthServiceImpl implements AuthService{
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Autowired
+    private JwtUtil jwtUtil;
     
     private final int AUTH_CODE_EXPIRATION_TIME = 180;
     
     private final String VERIFIED_EMAIL_KEY = "verifiedEmail:";
+    private final String JWT_EMAIL_KEY = "jwtRefreshTokenEmail:";
 
     public ApiResponse<String> sendCode(MailAuthRequest mailAuthRequest) throws Exception {
         if(mailAuthRequest == null || mailAuthRequest.isEmailEmpty()) 
@@ -100,7 +110,7 @@ public class AuthServiceImpl implements AuthService{
         }
     }
 
-    public ApiResponse<String> loginUser(User loginData) throws Exception {
+    public ApiResponse<JwtTokenRequest> loginUser(User loginData) throws Exception {
         if(loginData == null) 
             throw new IllegalArgumentException("Parameter is Empty");
 
@@ -112,11 +122,6 @@ public class AuthServiceImpl implements AuthService{
 
         User user = userMapper.selectDataByEmail(email);
 
-
-        // String token = "";
-        //int exprTime = 3600000;
-
-
         if(user == null) {
             return ApiResponseUtil.fail("존재하지 않는 아이디입니다.");
         } else {
@@ -124,9 +129,10 @@ public class AuthServiceImpl implements AuthService{
             String dbPw = user.getPassword();
             String encryptPw = SHA256.getEncrypt(password, salt);
             if(StringUtils.equals(dbPw, encryptPw)) {
-                // token = tokenProvider.createToken(user);
-                // jwt로 token할지 고민중
-                return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, "");
+                String accessToken = jwtUtil.generateToken(user);
+                String refreshToken = jwtUtil.generateRefreshToken(user);
+                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(7, TimeUnit.DAYS, false));
+                return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenRequest(accessToken, refreshToken));
             } else {
                 return ApiResponseUtil.fail("비밀번호를 확인해주세요.");
             }
@@ -136,5 +142,53 @@ public class AuthServiceImpl implements AuthService{
     public boolean verifiedEmailCheck(String email) throws Exception {
         String verifiedEmail = redisUtil.getData(VERIFIED_EMAIL_KEY + email);
         return StringUtils.equals(verifiedEmail, "Y");
+    }
+
+    public ApiResponse<JwtTokenRequest> refreshAccessToken(JwtTokenRequest jwtTokenRequest) throws Exception {
+        if (jwtTokenRequest == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        String refreshToken = jwtTokenRequest.getRefreshToken();
+        String email = jwtUtil.extractEmail(refreshToken);
+
+        // 리프레시 토큰과 이메일 검증
+        if (StringUtils.isAnyEmpty(refreshToken, email)) {
+            return ApiResponseUtil.fail("Refresh token or email is missing.");
+        }
+
+        // Redis에서 리프레시 토큰 유효성 검사
+        String storedRefreshToken = redisUtil.getData(JWT_EMAIL_KEY + email);
+        if (!StringUtils.equals(storedRefreshToken, refreshToken)) {
+            return ApiResponseUtil.fail("Invalid refresh token.");
+        }
+
+        // 사용자 정보 조회
+        User user = userMapper.selectDataByEmail(email);
+        if (user == null) {
+            return ApiResponseUtil.fail("User not found.");
+        }
+
+        // 새 액세스 토큰 생성
+        String newAccessToken = jwtUtil.generateToken(user);
+        if (StringUtils.isEmpty(newAccessToken)) {
+            return ApiResponseUtil.fail(CommonConstants.ERROR_MESSAGE);
+        }
+
+        // 새 액세스 토큰 설정
+        jwtTokenRequest.setAccessToken(newAccessToken);
+        return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, jwtTokenRequest);
+    }
+
+    public ResultStatus validateToken(String token) throws Exception {
+        return StringUtils.isNotEmpty(token) && !jwtUtil.isTokenExpired(token) ? ResultStatus.SUCCESS : ResultStatus.FAIL;
+    }
+
+    public void logout(JwtTokenRequest jwtTokenRequest) throws Exception {
+        if (jwtTokenRequest == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        String email = jwtUtil.extractEmail(jwtTokenRequest.getAccessToken());
+
+        redisUtil.deleteData(JWT_EMAIL_KEY + email);
     }
 }
