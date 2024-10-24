@@ -13,6 +13,7 @@ import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
 import com.couple.back.common.CommonConstants.ResultStatus;
+import com.couple.back.exception.DuplicateLoginException;
 import com.couple.back.model.JwtTokenRequest;
 import com.couple.back.model.MailAuthRequest;
 import com.couple.back.model.User;
@@ -65,6 +66,8 @@ public class AuthController {
 			} 
 
 			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (DuplicateLoginException e) {
+			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.CONFLICT);
 		} catch (IllegalArgumentException e) {
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
@@ -73,8 +76,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-	public ResponseEntity<ApiResponse<String>> logout(@RequestBody JwtTokenRequest jwtTokenRequest) {
+	public ResponseEntity<ApiResponse<String>> logout(@RequestHeader("Jwt-Auth-Access-Token") String accessToken) {
 		try{
+			JwtTokenRequest jwtTokenRequest = new JwtTokenRequest(accessToken, "");
 			authService.logout(jwtTokenRequest);
 			return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
@@ -85,8 +89,9 @@ public class AuthController {
 	}
 
 	@PostMapping("/refreshAccessToken")
-	public ResponseEntity<ApiResponse<JwtTokenRequest>> refreshAccessToken(@RequestBody JwtTokenRequest jwtTokenRequest) {
+	public ResponseEntity<ApiResponse<JwtTokenRequest>> refreshAccessToken(@RequestHeader("Jwt-Auth-Refresh-Token") String refreshToken) {
 		try{
+			JwtTokenRequest jwtTokenRequest = new JwtTokenRequest("", refreshToken);
 			ApiResponse<JwtTokenRequest> result = authService.refreshAccessToken(jwtTokenRequest);
 			if (result.getStatus() == ResultStatus.FAIL) {
 				return new ResponseEntity<>(result, HttpStatus.BAD_REQUEST);
@@ -101,18 +106,19 @@ public class AuthController {
 	}
 
 	@PostMapping("/validateToken")
-	public ResponseEntity<ApiResponse<String>> validateToken(@RequestHeader("Jwt-Auth-Token") String token) {
+	public ResponseEntity<ApiResponse<String>> validateToken(@RequestHeader("Jwt-Auth-Access-Token") String accessToken, @RequestHeader("Jwt-Auth-Refresh-Token") String refreshToken) {
 		try{
-			ResultStatus result = authService.validateToken(token);
+			JwtTokenRequest jwtTokenRequest = new JwtTokenRequest(accessToken, refreshToken);
+			ResultStatus result = authService.validateToken(jwtTokenRequest);
 			if (result == ResultStatus.FAIL) {
-				return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE), HttpStatus.UNAUTHORIZED);
+				return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.TOKEN_EXPIRED_MESSAGE), HttpStatus.UNAUTHORIZED);
 			} 
 
 			return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
-			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.UNAUTHORIZED);
+			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.TOKEN_EXPIRED_MESSAGE),HttpStatus.UNAUTHORIZED);
 		}
 	}
 

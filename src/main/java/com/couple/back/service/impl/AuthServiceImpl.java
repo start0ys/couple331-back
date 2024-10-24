@@ -15,6 +15,7 @@ import com.couple.back.common.CommonConstants;
 import com.couple.back.common.CommonUtil;
 import com.couple.back.common.JwtUtil;
 import com.couple.back.common.CommonConstants.ResultStatus;
+import com.couple.back.exception.DuplicateLoginException;
 import com.couple.back.common.MailUtil;
 import com.couple.back.common.RedisUtil;
 import com.couple.back.common.SHA256;
@@ -40,7 +41,7 @@ public class AuthServiceImpl implements AuthService{
     private JwtUtil jwtUtil;
     
     private final int AUTH_CODE_EXPIRATION_TIME = 180;
-    
+    private final String CHARACTER_TABLE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private final String VERIFIED_EMAIL_KEY = "verifiedEmail:";
     private final String JWT_EMAIL_KEY = "jwtRefreshTokenEmail:";
 
@@ -86,8 +87,8 @@ public class AuthServiceImpl implements AuthService{
             if (i > 0 && i % groupSize == 0) {
                 buf.append('-'); // 그룹 사이에 하이픈 추가
             }
-            int index = random.nextInt(CommonConstants.CHARACTER_TABLE.length());
-            buf.append(CommonConstants.CHARACTER_TABLE.charAt(index));
+            int index = random.nextInt(CHARACTER_TABLE.length());
+            buf.append(CHARACTER_TABLE.charAt(index));
         }
         return buf.toString();
     }
@@ -129,9 +130,16 @@ public class AuthServiceImpl implements AuthService{
             String dbPw = user.getPassword();
             String encryptPw = SHA256.getEncrypt(password, salt);
             if(StringUtils.equals(dbPw, encryptPw)) {
+                if(redisUtil.existData(JWT_EMAIL_KEY + email)) {
+                    if(StringUtils.isEmpty(loginData.getDuplicateLoginYn())) {
+                        throw new DuplicateLoginException("이미 로그인 되어있는 ID 입니다.");
+                    } else {
+                        redisUtil.deleteData(JWT_EMAIL_KEY + email);
+                    }
+                }
                 String accessToken = jwtUtil.generateToken(user);
                 String refreshToken = jwtUtil.generateRefreshToken(user);
-                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(7, TimeUnit.DAYS, false));
+                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, false));
                 return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenRequest(accessToken, refreshToken));
             } else {
                 return ApiResponseUtil.fail("비밀번호를 확인해주세요.");
@@ -158,7 +166,7 @@ public class AuthServiceImpl implements AuthService{
 
         // Redis에서 리프레시 토큰 유효성 검사
         String storedRefreshToken = redisUtil.getData(JWT_EMAIL_KEY + email);
-        if (!StringUtils.equals(storedRefreshToken, refreshToken)) {
+        if (!StringUtils.equals(storedRefreshToken, refreshToken) || jwtUtil.isTokenExpired(refreshToken)) {
             return ApiResponseUtil.fail("Invalid refresh token.");
         }
 
@@ -179,8 +187,20 @@ public class AuthServiceImpl implements AuthService{
         return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, jwtTokenRequest);
     }
 
-    public ResultStatus validateToken(String token) throws Exception {
-        return StringUtils.isNotEmpty(token) && !jwtUtil.isTokenExpired(token) ? ResultStatus.SUCCESS : ResultStatus.FAIL;
+    public ResultStatus validateToken(JwtTokenRequest jwtTokenRequest) throws Exception {
+        if (jwtTokenRequest == null || StringUtils.isAnyEmpty(jwtTokenRequest.getAccessToken(), jwtTokenRequest.getRefreshToken()))
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        if(jwtUtil.isTokenExpired(jwtTokenRequest.getAccessToken()) || jwtUtil.isTokenExpired(jwtTokenRequest.getRefreshToken())) {
+            return ResultStatus.FAIL;
+        } else {
+            String email = jwtUtil.extractEmail(jwtTokenRequest.getAccessToken());
+            String storedRefreshToken = redisUtil.getData(JWT_EMAIL_KEY + email);
+            if (StringUtils.equals(storedRefreshToken, jwtTokenRequest.getRefreshToken()))
+                return ResultStatus.SUCCESS;
+            else
+                return ResultStatus.FAIL;
+        }
     }
 
     public void logout(JwtTokenRequest jwtTokenRequest) throws Exception {

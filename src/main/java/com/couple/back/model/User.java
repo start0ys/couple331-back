@@ -21,6 +21,8 @@ public class User extends Auditable {
     private String gender;
     private Long coupleId;
 
+    private String duplicateLoginYn;
+
     public enum GenderType {MAN, WOMAN};
 
     public boolean validation(boolean isCreate) {

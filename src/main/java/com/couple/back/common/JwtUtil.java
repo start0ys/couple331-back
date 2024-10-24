@@ -25,13 +25,12 @@ public class JwtUtil {
 
     // JWT 토큰 생성
     public String generateToken(User user) {
-        // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.HOURS, true));
-        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.MINUTES, true));
+        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.HOURS, true));
     }
 
     // Refresh Token 생성
     public String generateRefreshToken(User user) {
-        return generateToken(user, CommonUtil.convertToSeconds(7, TimeUnit.DAYS, true));
+        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, true));
     }
 
     // JWT 토큰 생성

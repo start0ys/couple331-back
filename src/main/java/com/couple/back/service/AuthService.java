@@ -11,7 +11,7 @@ public interface AuthService {
     public ApiResponse<String> verifyCode(MailAuthRequest mailAuthRequest) throws Exception;
     public ApiResponse<JwtTokenRequest> loginUser(User loginData) throws Exception;
     public ApiResponse<JwtTokenRequest> refreshAccessToken(JwtTokenRequest jwtTokenRequest) throws Exception;
-    public ResultStatus validateToken(String token) throws Exception;
+    public ResultStatus validateToken(JwtTokenRequest jwtTokenRequest) throws Exception;
     public void logout(JwtTokenRequest jwtTokenRequest) throws Exception;
     public boolean verifiedEmailCheck(String email) throws Exception;
 }
