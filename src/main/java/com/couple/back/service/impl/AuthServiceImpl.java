@@ -23,7 +23,7 @@ import com.couple.back.common.JwtUtil;
 import com.couple.back.common.MailUtil;
 import com.couple.back.common.RedisUtil;
 import com.couple.back.common.SHA256;
-import com.couple.back.dto.JwtTokenRequest;
+import com.couple.back.dto.JwtTokenResponse;
 import com.couple.back.dto.LoginRequest;
 import com.couple.back.dto.MailAuthRequest;
 import com.couple.back.exception.DuplicateLoginException;
@@ -117,7 +117,7 @@ public class AuthServiceImpl implements AuthService{
         }
     }
 
-    public ApiResponse<JwtTokenRequest> loginUser(LoginRequest loginData) throws Exception {
+    public ApiResponse<JwtTokenResponse> loginUser(LoginRequest loginData) throws Exception {
         if(loginData == null) 
             throw new IllegalArgumentException("Parameter is Empty");
 
@@ -143,11 +143,12 @@ public class AuthServiceImpl implements AuthService{
                         redisUtil.deleteData(JWT_EMAIL_KEY + email);
                     }
                 }
-                String accessToken = jwtUtil.generateToken(user);
-                String refreshToken = jwtUtil.generateRefreshToken(user);
+                String authCode = getAuthCode();
+                String accessToken = jwtUtil.generateToken(user, authCode);
+                String refreshToken = jwtUtil.generateRefreshToken(user, authCode);
                 // redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, false));
                 redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, false));
-                return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenRequest(accessToken, refreshToken));
+                return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenResponse(accessToken, refreshToken));
             } else {
                 return ApiResponseUtil.fail("비밀번호를 확인해주세요.");
             }
@@ -159,21 +160,20 @@ public class AuthServiceImpl implements AuthService{
         return StringUtils.equals(verifiedEmail, "Y");
     }
 
-    public ApiResponse<JwtTokenRequest> refreshAccessToken(JwtTokenRequest jwtTokenRequest) throws Exception {
-        if (jwtTokenRequest == null)
+    public ApiResponse<JwtTokenResponse> refreshAccessToken(String authorizationHeader) throws Exception {
+        String refreshToken = CommonUtil.getAccessToken(authorizationHeader);
+        if (StringUtils.isEmpty(refreshToken))
             throw new IllegalArgumentException("Parameter is Empty");
 
-        String refreshToken = jwtTokenRequest.getRefreshToken();
-        String email = jwtUtil.extractEmail(refreshToken);
-
-        // 리프레시 토큰과 이메일 검증
-        if (StringUtils.isAnyEmpty(refreshToken, email)) {
-            return ApiResponseUtil.fail("Refresh token or email is missing.");
+        if(jwtUtil.isTokenExpired(refreshToken)) {
+            return ApiResponseUtil.fail("Refresh token이 만료되었습니다.");
         }
+
+        String email = jwtUtil.extractEmail(refreshToken);
 
         // Redis에서 리프레시 토큰 유효성 검사
         String storedRefreshToken = redisUtil.getData(JWT_EMAIL_KEY + email);
-        if (!StringUtils.equals(storedRefreshToken, refreshToken) || jwtUtil.isTokenExpired(refreshToken)) {
+        if (!StringUtils.equals(storedRefreshToken, refreshToken)) {
             return ApiResponseUtil.fail("Invalid refresh token.");
         }
 
@@ -184,43 +184,49 @@ public class AuthServiceImpl implements AuthService{
         }
 
         // 새 액세스 토큰 생성
-        String newAccessToken = jwtUtil.generateToken(user);
+        String authCode = getAuthCode();
+        String newAccessToken = jwtUtil.generateToken(user, authCode);
         if (StringUtils.isEmpty(newAccessToken)) {
             return ApiResponseUtil.fail(CommonConstants.ERROR_MESSAGE);
         }
 
         // 새 액세스 토큰 설정
-        jwtTokenRequest.setAccessToken(newAccessToken);
-        return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, jwtTokenRequest);
+        return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenResponse(newAccessToken, refreshToken));
     }
 
-    public ResultStatus validateToken(JwtTokenRequest jwtTokenRequest) throws Exception {
-        if (jwtTokenRequest == null || StringUtils.isAnyEmpty(jwtTokenRequest.getAccessToken(), jwtTokenRequest.getRefreshToken()))
+    public ResultStatus validateToken(String authorizationHeader) throws Exception {
+        String accessToken = CommonUtil.getAccessToken(authorizationHeader);
+        if (StringUtils.isEmpty(accessToken))
             throw new IllegalArgumentException("Parameter is Empty");
 
-        if(jwtUtil.isTokenExpired(jwtTokenRequest.getAccessToken()) || jwtUtil.isTokenExpired(jwtTokenRequest.getRefreshToken())) {
+        if(jwtUtil.isTokenExpired(accessToken)) {
             return ResultStatus.FAIL;
-        } else {
-            String email = jwtUtil.extractEmail(jwtTokenRequest.getAccessToken());
-            String storedRefreshToken = redisUtil.getData(JWT_EMAIL_KEY + email);
-            if (StringUtils.equals(storedRefreshToken, jwtTokenRequest.getRefreshToken()))
-                return ResultStatus.SUCCESS;
-            else
-                return ResultStatus.FAIL;
+        } 
+
+        String email = jwtUtil.extractEmail(accessToken);
+        String storedRefreshToken = redisUtil.getData(JWT_EMAIL_KEY + email);
+
+        if(StringUtils.isEmpty(storedRefreshToken) || jwtUtil.isTokenExpired(storedRefreshToken)) {
+            return ResultStatus.FAIL;
         }
+
+        String authCode = jwtUtil.extractAuthCode(accessToken);
+        String storedAuthCode = jwtUtil.extractAuthCode(storedRefreshToken);
+
+        return StringUtils.equals(authCode, storedAuthCode) ? ResultStatus.SUCCESS : ResultStatus.FAIL;
     }
 
-    public void logout(JwtTokenRequest jwtTokenRequest) throws Exception {
-        if (jwtTokenRequest == null)
-            throw new IllegalArgumentException("Parameter is Empty");
-
-        String email = jwtUtil.extractEmail(jwtTokenRequest.getAccessToken());
-
-        redisUtil.deleteData(JWT_EMAIL_KEY + email);
-
+    public void logout(String authorizationHeader) throws Exception {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             SecurityContextHolder.clearContext();
         }
+
+        String accessToken = CommonUtil.getAccessToken(authorizationHeader);
+        if (StringUtils.isEmpty(accessToken) || jwtUtil.isTokenExpired(accessToken))
+            return;
+
+        String email = jwtUtil.extractEmail(accessToken);
+        redisUtil.deleteData(JWT_EMAIL_KEY + email);
     }
 }

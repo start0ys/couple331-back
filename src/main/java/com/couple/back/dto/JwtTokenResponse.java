@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class JwtTokenRequest {
+public class JwtTokenResponse {
     private String accessToken;
     private String refreshToken;
 }

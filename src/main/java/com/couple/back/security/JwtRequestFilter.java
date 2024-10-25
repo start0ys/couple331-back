@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.couple.back.common.CommonConstants;
+import com.couple.back.common.CommonUtil;
 import com.couple.back.common.JwtUtil;
 import com.couple.back.model.User;
 
@@ -40,7 +41,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
         
-        final String accessToken = request.getHeader("Jwt-Auth-Access-Token");
+        final String accessToken = CommonUtil.getAccessToken(request.getHeader("Authorization"));
 
         if (StringUtils.isEmpty(accessToken) || jwtUtil.isTokenExpired(accessToken)) {
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

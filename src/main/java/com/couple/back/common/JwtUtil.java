@@ -1,15 +1,19 @@
 package com.couple.back.common;
 
+import java.util.stream.Collectors;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.couple.back.model.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -25,19 +29,19 @@ public class JwtUtil {
 
 
     // JWT 토큰 생성
-    public String generateToken(User user) {
+    public String generateToken(User user, String authCode) {
         // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.HOURS, true));
-        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.MINUTES, true));
+        return generateToken(user, authCode, CommonUtil.convertToSeconds(1, TimeUnit.MINUTES, true));
     }
 
     // Refresh Token 생성
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(User user, String authCode) {
         // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, true));
-        return generateToken(user, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, true));
+        return generateToken(user, authCode, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, true));
     }
 
     // JWT 토큰 생성
-    private String generateToken(User user, long expirationTime) {
+    private String generateToken(User user, String authCode, long expirationTime) {
         if(user == null) 
             return null;
 
@@ -50,6 +54,7 @@ public class JwtUtil {
         userMap.put("coupleId", user.getCoupleId());
         userMap.put("nickname", user.getNickname());
         userMap.put("userRole", user.getUserRole());
+        userMap.put("authCode", authCode);
         
         
         return Jwts.builder()
@@ -72,10 +77,15 @@ public class JwtUtil {
         return extractAllClaims(token).getExpiration();
     }
 
-      // JWT 토큰에서 사용자 정보 추출
-      public User extractUser(String token) {
+    // JWT 토큰에서 사용자 정보 추출
+    public User extractUser(String token) {
         Claims claims = extractAllClaims(token);
         return convertMapToUser(claims);
+    }
+
+    public String extractAuthCode(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims != null && claims.get("authCode") !=null ? claims.get("authCode").toString() : "";
     }
 
     // JWT가 만료되었는지 확인
@@ -103,16 +113,14 @@ public class JwtUtil {
         if(claims == null)
             return null;
     
-        User user = new User();
-        user.setUserId(claims.get("userId") == null ? null : Long.parseLong(claims.get("userId").toString()));
-        user.setEmail(claims.get("email") == null ? "" : claims.get("email").toString());
-        user.setName(claims.get("name") == null ? "" : claims.get("name").toString());
-        user.setGender(claims.get("gender") == null ? "" : claims.get("gender").toString());
-        user.setCoupleId(claims.get("coupleId") == null ? null : Long.parseLong(claims.get("coupleId").toString()));
-        user.setNickname(claims.get("nickname") == null ? "" : claims.get("nickname").toString());
-        user.setUserRole(claims.get("userRole") == null ? "" : claims.get("userRole").toString());
-
-        return user;
+        // 필요한 필드만 추출
+        Set<String> requiredKeys = Set.of("userId", "email", "name", "gender", "coupleId", "nickname", "userRole");
+        Map<String, Object> filteredClaims = claims.entrySet().stream()
+                .filter(entry -> requiredKeys.contains(entry.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    
+        // Map을 User 객체로 변환
+        return new ObjectMapper().convertValue(filteredClaims, User.class);
     }
     
 }

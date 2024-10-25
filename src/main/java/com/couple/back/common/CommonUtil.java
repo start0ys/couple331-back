@@ -3,9 +3,12 @@ package com.couple.back.common;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
 
 public class CommonUtil {
     
@@ -38,5 +41,9 @@ public class CommonUtil {
                 .registerModule(new JavaTimeModule()) 
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .convertValue(object, Map.class);
+    }
+
+    public static String getAccessToken(String authorizationHeader) {
+        return StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : "";
     }
 }
