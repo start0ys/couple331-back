@@ -16,36 +16,11 @@ public class User extends Auditable {
     private String password;
     private String userDesc;
     private String name;
+    private String nickname;
     private String status;
     private String salt;
     private String gender;
+    private String userRole;
     private Long coupleId;
-
-    private String duplicateLoginYn;
-
-    public enum GenderType {MAN, WOMAN};
-
-    public boolean validation(boolean isCreate) {
-        return StringUtils.isAnyEmpty(this.email, this.password, this.salt, this.gender) || (isCreate && StringUtils.isEmpty(this.name));
-    }
-
-    public boolean validation() {
-        return StringUtils.isAnyEmpty(this.email, this.gender, this.name, this.status) || userId == null;
-    }
-
-    public GenderType getGenderType() {
-        if(StringUtils.isEmpty(this.gender)) 
-            return null;
-
-        switch (this.gender) {
-            case "01":
-                return GenderType.MAN;
-            case "02":
-                return GenderType.WOMAN;
-            default:
-                return null;
-        }
-    }
-
 }
 

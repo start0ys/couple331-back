@@ -1,5 +1,6 @@
 package com.couple.back.service.impl;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,8 +24,7 @@ public class UserServiceImpl implements UserService{
         user.setSalt(salt);
         user.setPassword(SHA256.getEncrypt(user.getPassword(), salt));
 
-
-        if(user.validation(true)) 
+        if(StringUtils.isAnyEmpty(user.getEmail(), user.getSalt(), user.getPassword(), user.getGender(), user.getNickname(), user.getName())) 
             return null;
 
         user.setStatus("01");

@@ -1,4 +1,4 @@
-package com.couple.back.model;
+package com.couple.back.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -13,9 +13,10 @@ import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
 import com.couple.back.common.CommonConstants.ResultStatus;
+import com.couple.back.dto.JwtTokenRequest;
+import com.couple.back.dto.LoginRequest;
+import com.couple.back.dto.MailAuthRequest;
 import com.couple.back.exception.DuplicateLoginException;
-import com.couple.back.model.JwtTokenRequest;
-import com.couple.back.model.MailAuthRequest;
 import com.couple.back.model.User;
 import com.couple.back.service.AuthService;
 
@@ -58,7 +59,7 @@ public class AuthController {
 	}
     
 	@PostMapping("/login")
-    public ResponseEntity<ApiResponse<JwtTokenRequest>> login(@RequestBody User loginData) {
+    public ResponseEntity<ApiResponse<JwtTokenRequest>> login(@RequestBody LoginRequest loginData) {
 		try{
 			ApiResponse<JwtTokenRequest> result = authService.loginUser(loginData);
 			if (result.getStatus() == ResultStatus.FAIL) {
@@ -121,10 +122,4 @@ public class AuthController {
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.TOKEN_EXPIRED_MESSAGE),HttpStatus.UNAUTHORIZED);
 		}
 	}
-
-    @PostMapping("/resetPassword")
-    public ResponseEntity<ApiResponse<String>> resetPassword(@RequestBody User user) {
-        // 패스워드 초기화 로직
-		return null;
-    }
 }

@@ -2,8 +2,8 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.couple.back.mybatis.UserMapper">
 	<insert id="insertData" parameterType="com.couple.back.model.User" >
-		INSERT INTO users(email, password, user_desc, name, status, create_date_time, salt, gender)
-		VALUES (#{email}, #{password}, #{userDesc}, #{name}, #{status}, now(), #{salt}, #{gender});
+		INSERT INTO users(email, password, user_desc, name, status, create_date_time, salt, gender, nickname, user_role)
+		VALUES (#{email}, #{password}, #{userDesc}, #{name}, #{status}, now(), #{salt}, #{gender}, #{nickname}, 'COUPLE_331_USER');
 	</insert>
 
 	<select id="selectDataByEmail" parameterType="String" resultType="com.couple.back.model.User" >
@@ -13,9 +13,11 @@
 			password, 
 			user_desc as "userDesc", 
 			name, 
+			nickname,
 			status, 
 			salt,
 			gender,
+			user_role as "userRole",
 			couple_id as "coupleId",
 			create_date_time as "createDateTime",
 			create_user_id as "createUserId", 
@@ -31,9 +33,11 @@
 			password, 
 			user_desc as "userDesc", 
 			name, 
+			nickname,
 			status, 
 			salt,
 			gender,
+			user_role as "userRole",
 			couple_id as "coupleId",
 			create_date_time as "createDateTime",
 			create_user_id as "createUserId", 

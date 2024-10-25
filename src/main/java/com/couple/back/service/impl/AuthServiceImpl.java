@@ -1,26 +1,32 @@
 package com.couple.back.service.impl;
 
 import java.security.SecureRandom;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.common.CommonConstants.ResultStatus;
 import com.couple.back.common.CommonUtil;
 import com.couple.back.common.JwtUtil;
-import com.couple.back.common.CommonConstants.ResultStatus;
-import com.couple.back.exception.DuplicateLoginException;
 import com.couple.back.common.MailUtil;
 import com.couple.back.common.RedisUtil;
 import com.couple.back.common.SHA256;
-import com.couple.back.model.JwtTokenRequest;
-import com.couple.back.model.MailAuthRequest;
+import com.couple.back.dto.JwtTokenRequest;
+import com.couple.back.dto.LoginRequest;
+import com.couple.back.dto.MailAuthRequest;
+import com.couple.back.exception.DuplicateLoginException;
 import com.couple.back.model.User;
 import com.couple.back.mybatis.UserMapper;
 import com.couple.back.service.AuthService;
@@ -46,7 +52,7 @@ public class AuthServiceImpl implements AuthService{
     private final String JWT_EMAIL_KEY = "jwtRefreshTokenEmail:";
 
     public ApiResponse<String> sendCode(MailAuthRequest mailAuthRequest) throws Exception {
-        if(mailAuthRequest == null || mailAuthRequest.isEmailEmpty()) 
+        if(mailAuthRequest == null || StringUtils.isEmpty(mailAuthRequest.getEmail())) 
             throw new IllegalArgumentException("Parameter is Empty");
         String email = mailAuthRequest.getEmail();
         
@@ -94,7 +100,7 @@ public class AuthServiceImpl implements AuthService{
     }
 
     public ApiResponse<String> verifyCode(MailAuthRequest mailAuthRequest) throws Exception {
-        if(mailAuthRequest == null || mailAuthRequest.validation()) 
+        if(mailAuthRequest == null || StringUtils.isAnyEmpty(mailAuthRequest.getEmail(), mailAuthRequest.getAuthCode())) 
             throw new IllegalArgumentException("Parameter is Empty");
 
         String email = mailAuthRequest.getEmail();
@@ -111,7 +117,7 @@ public class AuthServiceImpl implements AuthService{
         }
     }
 
-    public ApiResponse<JwtTokenRequest> loginUser(User loginData) throws Exception {
+    public ApiResponse<JwtTokenRequest> loginUser(LoginRequest loginData) throws Exception {
         if(loginData == null) 
             throw new IllegalArgumentException("Parameter is Empty");
 
@@ -139,7 +145,8 @@ public class AuthServiceImpl implements AuthService{
                 }
                 String accessToken = jwtUtil.generateToken(user);
                 String refreshToken = jwtUtil.generateRefreshToken(user);
-                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, false));
+                // redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, false));
+                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, false));
                 return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenRequest(accessToken, refreshToken));
             } else {
                 return ApiResponseUtil.fail("비밀번호를 확인해주세요.");
@@ -210,5 +217,10 @@ public class AuthServiceImpl implements AuthService{
         String email = jwtUtil.extractEmail(jwtTokenRequest.getAccessToken());
 
         redisUtil.deleteData(JWT_EMAIL_KEY + email);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null) {
+            SecurityContextHolder.clearContext();
+        }
     }
 }

@@ -1,6 +1,8 @@
 package com.couple.back.common;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
@@ -8,10 +10,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.couple.back.model.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -25,22 +26,31 @@ public class JwtUtil {
 
     // JWT 토큰 생성
     public String generateToken(User user) {
-        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.HOURS, true));
+        // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.HOURS, true));
+        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.MINUTES, true));
     }
 
     // Refresh Token 생성
     public String generateRefreshToken(User user) {
-        return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, true));
+        // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, true));
+        return generateToken(user, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, true));
     }
 
     // JWT 토큰 생성
     private String generateToken(User user, long expirationTime) {
-        if(user == null || user.validation())
+        if(user == null) 
             return null;
 
         // 비밀번호 정보 초기화
-        user.setPassword("");
-        user.setSalt("");
+        Map<String, Object> userMap = new HashMap<>();
+        userMap.put("userId", user.getUserId());
+        userMap.put("email", user.getEmail());
+        userMap.put("name", user.getName());
+        userMap.put("gender", user.getGender());
+        userMap.put("coupleId", user.getCoupleId());
+        userMap.put("nickname", user.getNickname());
+        userMap.put("userRole", user.getUserRole());
+        
         
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS256, securityKey) // 암호화 알고리즘 및 키 세팅
@@ -48,7 +58,7 @@ public class JwtUtil {
                 .setIssuedAt(new Date()) // 생성일
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 만료일  현재시간에서 만료시간 동안 유효
                 // 유저 정보
-                .addClaims(CommonUtil.convertToMap(user))
+                .addClaims(userMap)
                 .compact();
     }
 
@@ -70,7 +80,13 @@ public class JwtUtil {
 
     // JWT가 만료되었는지 확인
     public Boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+        try {
+            return extractExpiration(token).before(new Date());
+        } catch (ExpiredJwtException e) {
+            return true;
+        } catch (Exception e) {
+            return true;
+        }
     }
 
     // JWT 토큰 검증
@@ -84,8 +100,19 @@ public class JwtUtil {
     }
 
     private User convertMapToUser(Claims claims) {
-        ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-        return objectMapper.convertValue(claims, User.class);
+        if(claims == null)
+            return null;
+    
+        User user = new User();
+        user.setUserId(claims.get("userId") == null ? null : Long.parseLong(claims.get("userId").toString()));
+        user.setEmail(claims.get("email") == null ? "" : claims.get("email").toString());
+        user.setName(claims.get("name") == null ? "" : claims.get("name").toString());
+        user.setGender(claims.get("gender") == null ? "" : claims.get("gender").toString());
+        user.setCoupleId(claims.get("coupleId") == null ? null : Long.parseLong(claims.get("coupleId").toString()));
+        user.setNickname(claims.get("nickname") == null ? "" : claims.get("nickname").toString());
+        user.setUserRole(claims.get("userRole") == null ? "" : claims.get("userRole").toString());
+
+        return user;
     }
     
 }

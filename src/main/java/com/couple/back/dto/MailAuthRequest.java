@@ -1,4 +1,4 @@
-package com.couple.back.model;
+package com.couple.back.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -12,13 +12,4 @@ import lombok.Setter;
 public class MailAuthRequest {
     private String email;
     private String authCode;
-
-    public boolean isEmailEmpty() {
-        return StringUtils.isEmpty(this.email);
-    }
-
-    public boolean validation() {
-        return StringUtils.isAnyEmpty(this.email, this.authCode);
-    }
-
 }
