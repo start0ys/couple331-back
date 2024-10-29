@@ -19,6 +19,9 @@ import com.couple.back.model.User;
 import com.couple.back.service.AuthService;
 import com.couple.back.service.UserService;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -43,8 +46,10 @@ public class UserController {
             }
             return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, user), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : register / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : register / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -58,8 +63,10 @@ public class UserController {
             }
             return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, user), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : getUser / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : getUser / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

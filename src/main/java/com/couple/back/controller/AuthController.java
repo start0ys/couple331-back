@@ -17,10 +17,12 @@ import com.couple.back.dto.JwtTokenResponse;
 import com.couple.back.dto.LoginRequest;
 import com.couple.back.dto.MailAuthRequest;
 import com.couple.back.exception.DuplicateLoginException;
-import com.couple.back.model.User;
 import com.couple.back.service.AuthService;
 
+import lombok.extern.slf4j.Slf4j;
 
+
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -37,8 +39,10 @@ public class AuthController {
 			}
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
+			log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : sendCode / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : sendCode / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -52,8 +56,10 @@ public class AuthController {
 			}
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
+			log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : verifyCode / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : verifyCode / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -68,10 +74,13 @@ public class AuthController {
 
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (DuplicateLoginException e) {
+			log.error("Status : " + HttpStatus.CONFLICT + " / Method : login / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.CONFLICT);
 		} catch (IllegalArgumentException e) {
+			log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : login / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : login / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
     }
@@ -82,8 +91,10 @@ public class AuthController {
 			authService.logout(authorizationHeader);
 			return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
+			log.error("Status : " + HttpStatus.UNAUTHORIZED + " / Method : logout / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
+			log.error("Status : " + HttpStatus.UNAUTHORIZED + " / Method : logout / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.UNAUTHORIZED);
 		}
 	}
@@ -98,8 +109,10 @@ public class AuthController {
 
 			return new ResponseEntity<>(result, HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
+			log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : refreshAccessToken / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
 		} catch (Exception e) {
+			log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : refreshAccessToken / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -114,8 +127,10 @@ public class AuthController {
 
 			return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
 		} catch (IllegalArgumentException e) {
+			log.error("Status : " + HttpStatus.UNAUTHORIZED + " / Method : validateToken / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.UNAUTHORIZED);
 		} catch (Exception e) {
+			log.error("Status : " + HttpStatus.UNAUTHORIZED + " / Method : validateToken / Message : " + e.getMessage());
 			return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.TOKEN_EXPIRED_MESSAGE),HttpStatus.UNAUTHORIZED);
 		}
 	}

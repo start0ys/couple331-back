@@ -1,12 +1,11 @@
 package com.couple.back.common;
 
-import java.util.stream.Collectors;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -112,15 +111,17 @@ public class JwtUtil {
     private User convertMapToUser(Claims claims) {
         if(claims == null)
             return null;
+
+        User user = new User();
+        user.setUserId(claims.get("userId") != null ? Long.parseLong(claims.get("userId").toString()) : null);
+        user.setEmail(claims.get("email") != null ? claims.get("email").toString() : "");
+        user.setName(claims.get("name") != null ? claims.get("name").toString() : "");
+        user.setGender(claims.get("gender") != null ? claims.get("gender").toString() : "");
+        user.setCoupleId(claims.get("coupleId") != null ? Long.parseLong(claims.get("coupleId").toString()) : null);
+        user.setNickname(claims.get("nickname") != null ? claims.get("nickname").toString() : "");
+        user.setUserRole(claims.get("userRole") != null ? claims.get("userRole").toString() : "");
     
-        // 필요한 필드만 추출
-        Set<String> requiredKeys = Set.of("userId", "email", "name", "gender", "coupleId", "nickname", "userRole");
-        Map<String, Object> filteredClaims = claims.entrySet().stream()
-                .filter(entry -> requiredKeys.contains(entry.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    
-        // Map을 User 객체로 변환
-        return new ObjectMapper().convertValue(filteredClaims, User.class);
+        return user;
     }
     
 }

@@ -47,7 +47,7 @@ public class SecurityConfig {
             response.setContentType("application/json");
             response.setCharacterEncoding("UTF-8");
             ObjectMapper objectMapper = new ObjectMapper();
-            String jsonResponse = objectMapper.writeValueAsString(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE));
+            String jsonResponse = objectMapper.writeValueAsString(ApiResponseUtil.error(CommonConstants.TOKEN_EXPIRED_MESSAGE));
             response.getWriter().write(jsonResponse);
         };
     }

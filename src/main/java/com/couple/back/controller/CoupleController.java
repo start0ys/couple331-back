@@ -16,6 +16,9 @@ import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
 import com.couple.back.model.Couple;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestController
 @RequestMapping("/couple")
 public class CoupleController {
@@ -29,8 +32,10 @@ public class CoupleController {
             }
             return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, couple), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : register / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : register / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
