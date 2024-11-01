@@ -23,6 +23,7 @@ import com.couple.back.common.JwtUtil;
 import com.couple.back.common.MailUtil;
 import com.couple.back.common.RedisUtil;
 import com.couple.back.common.SHA256;
+import com.couple.back.dto.CoupleStatusResponse;
 import com.couple.back.dto.JwtTokenResponse;
 import com.couple.back.dto.LoginRequest;
 import com.couple.back.dto.MailAuthRequest;

@@ -7,9 +7,9 @@ import com.couple.back.model.User;
 
 public class StatusConverter {
     public static enum GenderType {MAN, WOMAN};
-    public enum CoupleStatusType {PENDING, ACCEPTED, REJECTED, CONFIRMED, BREAKUP, TERMINATED};
+    public static enum CoupleStatusType {REQUEST, REJECT, APPROVAL, BREAKUP, TERMINATED};
 
-    public GenderType getGenderType(User user) {
+    public static GenderType getGenderType(User user) {
         if(user == null || StringUtils.isEmpty(user.getGender())) 
             return null;
 
@@ -23,22 +23,20 @@ public class StatusConverter {
         }
     }
 
-    public CoupleStatusType getCoupleStatusType(Couple couple) {
-        if(couple == null || StringUtils.isEmpty(couple.getStatus()))
+    public static CoupleStatusType getCoupleStatusType(String status) {
+        if(StringUtils.isEmpty(status))
             return null;
 
-        switch (couple.getStatus()) {
+        switch (status) {
             case "01": // 처음 신청한 상태
-                return CoupleStatusType.PENDING;
-            case "02": // 상대방이 수락한 상태 => 신청자가 확인하면 정상 상태로 변경됨
-                return CoupleStatusType.ACCEPTED; 
-            case "03": // 상대방이 거절한 상태 => 신청자가 확인하면 데이터 제거됨
-                return CoupleStatusType.REJECTED;
-            case "04": // 수락 후 확인을 거쳐 정식 커플이 된 상태
-                return CoupleStatusType.CONFIRMED;
-            case "05": // 사용자가 이별을 선언한 상태 => 상대방이 확인 하면 종료상태로 변경됨
+                return CoupleStatusType.REQUEST;
+            case "02": // 상대방이 거절한 상태
+                return CoupleStatusType.REJECT;
+            case "03": // 수락 후 확인을 거쳐 정식 커플이 된 상태
+                return CoupleStatusType.APPROVAL;
+            case "04": // 사용자가 이별을 선언한 상태 => 상대방이 확인 하면 종료상태로 변경됨
                 return CoupleStatusType.BREAKUP;
-            case "06": // 종료상태  => 추후 다시 동일 계정끼리 신청이되어 수락되면 다시 상태가 04로 변경
+            case "05": // 종료상태  => 추후 다시 동일 계정끼리 신청이되어 수락되면 다시 상태가 03로 변경
                 return CoupleStatusType.TERMINATED;
             default:
                 return null;

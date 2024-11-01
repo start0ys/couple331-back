@@ -50,7 +50,6 @@ public class JwtUtil {
         userMap.put("email", user.getEmail());
         userMap.put("name", user.getName());
         userMap.put("gender", user.getGender());
-        userMap.put("coupleId", user.getCoupleId());
         userMap.put("nickname", user.getNickname());
         userMap.put("userRole", user.getUserRole());
         userMap.put("authCode", authCode);
@@ -117,7 +116,6 @@ public class JwtUtil {
         user.setEmail(claims.get("email") != null ? claims.get("email").toString() : "");
         user.setName(claims.get("name") != null ? claims.get("name").toString() : "");
         user.setGender(claims.get("gender") != null ? claims.get("gender").toString() : "");
-        user.setCoupleId(claims.get("coupleId") != null ? Long.parseLong(claims.get("coupleId").toString()) : null);
         user.setNickname(claims.get("nickname") != null ? claims.get("nickname").toString() : "");
         user.setUserRole(claims.get("userRole") != null ? claims.get("userRole").toString() : "");
     

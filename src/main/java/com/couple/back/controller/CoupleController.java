@@ -1,5 +1,6 @@
 package com.couple.back.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,7 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.dto.CoupleStatusResponse;
 import com.couple.back.model.Couple;
+import com.couple.back.service.CoupleService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -22,6 +25,9 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/couple")
 public class CoupleController {
+
+    @Autowired
+    private CoupleService coupleService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<Couple>> register(@RequestBody Couple saveData) {
@@ -36,6 +42,23 @@ public class CoupleController {
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : register / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/{userId}/status")
+    public ResponseEntity<ApiResponse<CoupleStatusResponse>> getStatusType(@PathVariable Long userId) {
+        try {
+            CoupleStatusResponse result = coupleService.getStatusType(userId);
+            if(result == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, result), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : getStatusType / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : getStatusType / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

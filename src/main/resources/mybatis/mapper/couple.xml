@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.couple.back.mybatis.CoupleMapper">
+	<!-- <insert id="insertData" parameterType="com.couple.back.model.Couple" >
+		INSERT INTO users(email, password, user_desc, name, status, create_date_time, salt, gender, nickname, user_role)
+		VALUES (#{email}, #{password}, #{userDesc}, #{name}, #{status}, now(), #{salt}, #{gender}, #{nickname}, 'COUPLE_331_USER');
+	</insert> -->
+
+	<select id="selectCoupleStatusDetailByCoupleId" parameterType="Long" resultType="com.couple.back.dto.CoupleStatusDetail" >
+	    SELECT
+            c.status,
+            c.update_user_id as "updateUserId",
+            m.name as "manName",
+            w.name as "womanName"
+        FROM couple c
+        INNER JOIN users m
+        ON c.man_id = m.user_id
+        INNER JOIN users w
+        ON c.woman_id = w.user_id
+        WHERE c.couple_id = #{coupleId}
+	</select>
+
+	<!-- <select id="selectDataByUserId" parameterType="Long" resultType="com.couple.back.model.User" >
+		SELECT 
+			user_id as "userId", 
+			email, 
+			password, 
+			user_desc as "userDesc", 
+			name, 
+			nickname,
+			status, 
+			salt,
+			gender,
+			user_role as "userRole",
+			couple_id as "coupleId",
+			create_date_time as "createDateTime",
+			create_user_id as "createUserId", 
+			update_date_time as "updateDateTime",
+			update_user_id as "updateUserId"
+		FROM users WHERE user_id = #{userId};
+	</select>
+
+	<select id="selectCountByEmail" parameterType="String" resultType="int" >
+		SELECT 
+			count(email)
+		FROM users WHERE email = #{email};
+	</select>
+
+	<update id="updateDataByEmail" parameterType="com.couple.back.model.User">
+		UPDATE users
+		SET 
+			<if test="password != null and password != ''">password=#{password},</if>
+			<if test="userDesc != null and userDesc != ''">user_desc=#{userDesc},</if>
+			<if test="status != null and status != ''">status=#{status},</if>
+			<if test="salt != null and salt != ''">salt=#{salt},</if>
+			<if test="updateUserId != null and updateUserId != ''">update_user_id=#{updateUserId},</if>
+			update_date_time = now()
+		WHERE email = #{email};
+	</update> -->
+</mapper>

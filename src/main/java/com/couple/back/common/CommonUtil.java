@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -45,5 +46,17 @@ public class CommonUtil {
 
     public static String getAccessToken(String authorizationHeader) {
         return StringUtils.isNotEmpty(authorizationHeader) && authorizationHeader.startsWith("Bearer ") ? authorizationHeader.substring(7) : "";
+    }
+
+    public static String convertToJsonString(Object obj) {
+        if(obj == null)
+            return "";
+
+        try {
+            return new ObjectMapper()
+                    .writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            return "";
+        }
     }
 }
