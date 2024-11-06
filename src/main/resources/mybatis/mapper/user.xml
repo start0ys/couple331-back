@@ -63,4 +63,35 @@
 			update_date_time = now()
 		WHERE email = #{email};
 	</update>
+
+	<select id="selectSingleUsersByGender" parameterType="String" resultType="com.couple.back.model.User" >
+		SELECT 
+			u.user_id as "userId", 
+			u.email, 
+			u.name, 
+			u.nickname,
+			u.status, 
+			u.gender,
+			u.couple_id as "coupleId"
+		FROM users u
+		LEFT OUTER JOIN couple c
+		ON u.couple_id = c.couple_id
+		WHERE 
+		COALESCE(c.status, '') NOT IN ('01', '03')
+		AND gender = #{gender};
+	</select>
+
+	<update id="updateCoupleId" parameterType="com.couple.back.model.User">
+		UPDATE users
+		SET 
+			<choose>
+				<when test="coupleId != null">
+					couple_id = #{coupleId}
+				</when>
+				<otherwise> 
+					couple_id = null
+				</otherwise>
+			</choose>
+		WHERE user_id = #{userId};
+	</update>
 </mapper>

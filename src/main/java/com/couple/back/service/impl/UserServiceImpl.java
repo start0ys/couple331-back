@@ -9,6 +9,11 @@ import com.couple.back.model.User;
 import com.couple.back.mybatis.UserMapper;
 import com.couple.back.service.UserService;
 
+import com.couple.back.common.StatusConverter;
+import com.couple.back.common.StatusConverter.GenderType;
+
+import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService{
     
@@ -40,5 +45,30 @@ public class UserServiceImpl implements UserService{
             throw new IllegalArgumentException("Parameter is Empty");
 
         return userMapper.selectDataByUserId(userId);
+    }
+
+    public List<User> getOppositeGenderSingleUsers(String gender) throws Exception {
+        if(StringUtils.isEmpty(gender))
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        GenderType genderType = StatusConverter.getGenderType(gender);
+
+        if(genderType == null)
+            return null;
+
+        String oppositeGender = genderType == GenderType.MAN ? "02" : "01";
+
+        return userMapper.selectSingleUsersByGender(oppositeGender);
+    }
+
+    public void updateCoupleId(Long userId, Long coupleId) throws Exception {
+        if(userId == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+        
+        User user = new User();
+        user.setUserId(userId);
+        user.setCoupleId(coupleId);
+
+        userMapper.updateCoupleId(user);
     }
 }

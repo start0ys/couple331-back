@@ -1,8 +1,8 @@
 package com.couple.back.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-
-import org.apache.commons.lang3.StringUtils;
+import java.time.format.DateTimeFormatter;
 
 import com.couple.back.common.Auditable;
 
@@ -18,4 +18,8 @@ public class Couple extends Auditable {
     private String coupleDesc;
     private String status;
     private LocalDateTime startDate;
+
+    public void setStartDate(String date) {
+        this.startDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
+    }
 }

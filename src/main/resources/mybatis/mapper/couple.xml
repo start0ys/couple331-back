@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.couple.back.mybatis.CoupleMapper">
-	<!-- <insert id="insertData" parameterType="com.couple.back.model.Couple" >
-		INSERT INTO users(email, password, user_desc, name, status, create_date_time, salt, gender, nickname, user_role)
-		VALUES (#{email}, #{password}, #{userDesc}, #{name}, #{status}, now(), #{salt}, #{gender}, #{nickname}, 'COUPLE_331_USER');
-	</insert> -->
+	<insert id="insertData" parameterType="com.couple.back.model.Couple" useGeneratedKeys="true" keyProperty="coupleId" keyColumn="couple_id">
+		INSERT INTO couple(man_id, woman_id, couple_desc, status, start_date, create_user_id, update_user_id)
+		VALUES (#{manId}, #{womanId}, #{coupleDesc}, '01', #{startDate}, #{createUserId}, #{updateUserId});
+	</insert>
 
 	<select id="selectCoupleStatusDetailByCoupleId" parameterType="Long" resultType="com.couple.back.dto.CoupleStatusDetail" >
 	    SELECT
@@ -19,6 +19,30 @@
         ON c.woman_id = w.user_id
         WHERE c.couple_id = #{coupleId}
 	</select>
+
+	<select id="selectCoupleByCoupleId" parameterType="Long" resultType="com.couple.back.model.Couple" >
+	    SELECT
+			couple_id as "coupleId",
+			man_id as "manId",
+			woman_id as "womanId",
+            status
+        FROM couple
+        WHERE couple_id = #{coupleId}
+	</select>
+
+	<delete id="deleteCoupleByCoupleId" parameterType="Long">
+		DELETE FROM couple
+ 		WHERE couple_id = #{coupleId};
+	</delete>
+
+	<update id="updateCoupleStatus" parameterType="com.couple.back.model.Couple">
+		UPDATE couple
+		SET 
+			status = #{status},
+			update_user_id=#{updateUserId},
+			update_date_time = now()
+		WHERE couple_id = #{coupleId};
+	</update>
 
 	<!-- <select id="selectDataByUserId" parameterType="Long" resultType="com.couple.back.model.User" >
 		SELECT 

@@ -11,13 +11,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
 import com.couple.back.model.User;
+import com.couple.back.model.Couple;
 import com.couple.back.service.AuthService;
 import com.couple.back.service.UserService;
+
+import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -81,5 +85,22 @@ public class UserController {
     public ResponseEntity<ApiResponse<User>> deleteUser(@PathVariable Long userId) {
         // 사용자 삭제
         return null;
+    }
+
+    @GetMapping("/oppositeGender/singles")
+    public ResponseEntity<ApiResponse<List<User>>> getOppositeGenderSingleUsers(@RequestParam("gender") String gender) {
+        try {
+            List<User> user = userService.getOppositeGenderSingleUsers(gender);
+            if(user == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, user), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : getOppositeGenderSingleUsers / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : getOppositeGenderSingleUsers / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
