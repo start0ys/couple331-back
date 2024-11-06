@@ -2,6 +2,7 @@ package com.couple.back.common;
 
 public class CommonConstants {
     public static enum ResultStatus {SUCCESS, FAIL, ERROR};
+    public static enum DateType {SECONDS, MINUTES, HOURS, DAYS, MONTHS, YEARS};
 
     public static final String SUCCESS_MESSAGE = "성공하였습니다.";
     public static final String FAIL_MESSAGE = "실패하였습니다.";

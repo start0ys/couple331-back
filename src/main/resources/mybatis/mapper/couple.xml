@@ -11,7 +11,9 @@
             c.status,
             c.update_user_id as "updateUserId",
             m.name as "manName",
-            w.name as "womanName"
+            w.name as "womanName",
+			c.start_date as "startDate",
+			c.couple_desc as "coupleDesc"
         FROM couple c
         INNER JOIN users m
         ON c.man_id = m.user_id

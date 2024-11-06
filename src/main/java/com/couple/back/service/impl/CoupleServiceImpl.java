@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.couple.back.common.CommonConstants.DateType;
 import com.couple.back.common.CommonConstants.ResultStatus;
+import com.couple.back.common.CommonUtil;
 import com.couple.back.common.StatusConverter;
 import com.couple.back.common.StatusConverter.ApprovalStatusType;
 import com.couple.back.common.StatusConverter.CoupleStatusType;
@@ -74,7 +76,9 @@ public class CoupleServiceImpl implements CoupleService{
                 return null;
         }
 
-        return new CoupleStatusResponse(statusType, senderYn, message, coupleId);
+        String daysTogether = CommonUtil.calculateDaysFromToday(detail.getStartDate(), true, DateType.DAYS);
+
+        return new CoupleStatusResponse(statusType, senderYn, message, coupleId, daysTogether);
     }
 
     @Transactional
@@ -140,5 +144,19 @@ public class CoupleServiceImpl implements CoupleService{
                 return ResultStatus.FAIL;
         }
 
+    }
+
+    public CoupleStatusDetail getCoupleDetail(Long coupleId) throws Exception {
+        if(coupleId == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        CoupleStatusDetail detail = coupleMapper.selectCoupleStatusDetailByCoupleId(coupleId);
+        if(detail == null)
+            return null;
+
+        CoupleStatusType statusType =  StatusConverter.getCoupleStatusType(detail.getStatus());
+
+
+        return statusType == CoupleStatusType.APPROVAL ? detail : null;
     }
 }

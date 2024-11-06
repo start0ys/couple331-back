@@ -1,29 +1,23 @@
 package com.couple.back.service.impl;
 
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.common.CommonConstants.DateType;
 import com.couple.back.common.CommonConstants.ResultStatus;
 import com.couple.back.common.CommonUtil;
 import com.couple.back.common.JwtUtil;
 import com.couple.back.common.MailUtil;
 import com.couple.back.common.RedisUtil;
 import com.couple.back.common.SHA256;
-import com.couple.back.dto.CoupleStatusResponse;
 import com.couple.back.dto.JwtTokenResponse;
 import com.couple.back.dto.LoginRequest;
 import com.couple.back.dto.MailAuthRequest;
@@ -147,8 +141,8 @@ public class AuthServiceImpl implements AuthService{
                 String authCode = getAuthCode();
                 String accessToken = jwtUtil.generateToken(user, authCode);
                 String refreshToken = jwtUtil.generateRefreshToken(user, authCode);
-                // redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, false));
-                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, false));
+                // redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, DateType.DAYS, false));
+                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(2, DateType.MINUTES, false));
                 return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenResponse(accessToken, refreshToken));
             } else {
                 return ApiResponseUtil.fail("비밀번호를 확인해주세요.");

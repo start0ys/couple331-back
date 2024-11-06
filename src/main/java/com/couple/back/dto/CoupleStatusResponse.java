@@ -14,4 +14,5 @@ public class CoupleStatusResponse {
     private String senderYn;
     private String message;
     private Long coupleId;
+    private String daysTogether;
 }

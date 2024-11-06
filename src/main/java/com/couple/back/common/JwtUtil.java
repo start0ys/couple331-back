@@ -3,16 +3,13 @@ package com.couple.back.common;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.couple.back.common.CommonConstants.DateType;
 import com.couple.back.model.User;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -29,14 +26,14 @@ public class JwtUtil {
 
     // JWT 토큰 생성
     public String generateToken(User user, String authCode) {
-        // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.HOURS, true));
-        return generateToken(user, authCode, CommonUtil.convertToSeconds(1, TimeUnit.MINUTES, true));
+        // return generateToken(user, CommonUtil.convertToSeconds(1, DateType.HOURS, true));
+        return generateToken(user, authCode, CommonUtil.convertToSeconds(1, DateType.MINUTES, true));
     }
 
     // Refresh Token 생성
     public String generateRefreshToken(User user, String authCode) {
-        // return generateToken(user, CommonUtil.convertToSeconds(1, TimeUnit.DAYS, true));
-        return generateToken(user, authCode, CommonUtil.convertToSeconds(2, TimeUnit.MINUTES, true));
+        // return generateToken(user, CommonUtil.convertToSeconds(1, DateType.DAYS, true));
+        return generateToken(user, authCode, CommonUtil.convertToSeconds(2, DateType.MINUTES, true));
     }
 
     // JWT 토큰 생성

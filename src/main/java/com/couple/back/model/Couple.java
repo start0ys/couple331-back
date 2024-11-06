@@ -1,10 +1,9 @@
 package com.couple.back.model;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 import com.couple.back.common.Auditable;
+import com.couple.back.common.CommonUtil;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +19,6 @@ public class Couple extends Auditable {
     private LocalDateTime startDate;
 
     public void setStartDate(String date) {
-        this.startDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay();
+        this.startDate = CommonUtil.convertStringToLocalDate(date, "yyyyMMdd");
     }
 }

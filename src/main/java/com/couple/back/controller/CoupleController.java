@@ -17,6 +17,7 @@ import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
 import com.couple.back.common.CommonConstants.ResultStatus;
+import com.couple.back.dto.CoupleStatusDetail;
 import com.couple.back.dto.CoupleStatusRequest;
 import com.couple.back.dto.CoupleStatusResponse;
 import com.couple.back.model.Couple;
@@ -84,10 +85,21 @@ public class CoupleController {
     }
 
 
-    @GetMapping("/{coupleId}")
-    public ResponseEntity<ApiResponse<Couple>> getCouple(@PathVariable Long coupleId) {
-        // 커플 정보 조회
-        return null;
+    @GetMapping("/{coupleId}/detail")
+    public ResponseEntity<ApiResponse<CoupleStatusDetail>> getCoupleDetail(@PathVariable Long coupleId) {
+        try {
+            CoupleStatusDetail result = coupleService.getCoupleDetail(coupleId);
+            if(result == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, result), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : getCoupleDetail / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : getCoupleDetail / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{coupleId}")
