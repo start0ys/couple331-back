@@ -61,14 +61,20 @@ public class UserServiceImpl implements UserService{
         return userMapper.selectSingleUsersByGender(oppositeGender);
     }
 
-    public void updateCoupleId(Long userId, Long coupleId) throws Exception {
+    public void updateCoupleId(Long userId, Long afterCoupleId, Long beforeCoupleId) throws Exception {
         if(userId == null)
             throw new IllegalArgumentException("Parameter is Empty");
-        
-        User user = new User();
-        user.setUserId(userId);
-        user.setCoupleId(coupleId);
 
-        userMapper.updateCoupleId(user);
+        if(afterCoupleId == null) {
+            User user = getUser(userId);
+            if(user == null || user.getCoupleId() != beforeCoupleId)
+                return;
+        }
+        
+        User updateUser = new User();
+        updateUser.setUserId(userId);
+        updateUser.setCoupleId(afterCoupleId);
+
+        userMapper.updateCoupleId(updateUser);
     }
 }

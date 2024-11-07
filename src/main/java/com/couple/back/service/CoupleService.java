@@ -11,4 +11,5 @@ public interface CoupleService {
     public CoupleStatusResponse getStatusType(Long userId) throws Exception;
     public ResultStatus updateCoupleStatus(Long coupleId, CoupleStatusRequest coupleStatusRequest) throws Exception;
     public CoupleStatusDetail getCoupleDetail(Long coupleId) throws Exception;
+    public ResultStatus updateCoupleDesc(Long coupleId, CoupleStatusRequest coupleStatusRequest) throws Exception;
 }

@@ -6,6 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class CoupleStatusRequest {
-    Long updateUserId;
-    String approvalStatusType;
+    private Long updateUserId;
+    private String approvalStatusType;
+    private String coupleDesc;
 }

@@ -102,6 +102,23 @@ public class CoupleController {
         }
     }
 
+    @PatchMapping("/{coupleId}/desc")
+    public ResponseEntity<ApiResponse<String>> updateCoupleDesc(@PathVariable Long coupleId,  @RequestBody CoupleStatusRequest coupleStatusRequest)  {
+        try {
+            ResultStatus result = coupleService.updateCoupleDesc(coupleId, coupleStatusRequest);
+            if (result == ResultStatus.FAIL) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : updateCoupleDesc / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : updateCoupleDesc / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @PutMapping("/{coupleId}")
     public ResponseEntity<ApiResponse<Couple>> updateCouple(@PathVariable Long coupleId, @RequestBody Couple saveData) {
         // 커플 정보 수정

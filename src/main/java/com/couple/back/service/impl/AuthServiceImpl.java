@@ -141,8 +141,7 @@ public class AuthServiceImpl implements AuthService{
                 String authCode = getAuthCode();
                 String accessToken = jwtUtil.generateToken(user, authCode);
                 String refreshToken = jwtUtil.generateRefreshToken(user, authCode);
-                // redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, DateType.DAYS, false));
-                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(2, DateType.MINUTES, false));
+                redisUtil.setDataExpire(JWT_EMAIL_KEY + email, refreshToken, CommonUtil.convertToSeconds(1, DateType.DAYS, false));
                 return ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, new JwtTokenResponse(accessToken, refreshToken));
             } else {
                 return ApiResponseUtil.fail("비밀번호를 확인해주세요.");

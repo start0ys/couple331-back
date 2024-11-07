@@ -55,6 +55,7 @@ public class CoupleServiceImpl implements CoupleService{
         String other = genderType == GenderType.MAN ? detail.getWomanName() : detail.getManName();
         String messageType = StringUtils.equals(senderYn, "Y") ? "님에게" : "님이";
         String message = "";
+        String daysTogether = "";
 
         switch (statusType) {
             case REQUEST:
@@ -65,6 +66,7 @@ public class CoupleServiceImpl implements CoupleService{
                 break;
             case APPROVAL: 
                 message = "[ " + other + " ] " + messageType + " 커플 신청을 승인하였습니다.";
+                daysTogether = CommonUtil.calculateDaysFromToday(detail.getStartDate(), true, DateType.DAYS);
                 break;
             case BREAKUP: 
                 message = "[ " + other + " ] " + messageType + " 이별을 요청하였습니다.";
@@ -72,11 +74,13 @@ public class CoupleServiceImpl implements CoupleService{
             case TERMINATED: 
                 message = "[ " + other + " ] " + messageType + " 이별을 승인하였습니다.";
                 break;
+            case CONFIRMED:
+                daysTogether = CommonUtil.calculateDaysFromToday(detail.getStartDate(), true, DateType.DAYS);
+                break;
             default:
                 return null;
         }
 
-        String daysTogether = CommonUtil.calculateDaysFromToday(detail.getStartDate(), true, DateType.DAYS);
 
         return new CoupleStatusResponse(statusType, senderYn, message, coupleId, daysTogether);
     }
@@ -94,8 +98,8 @@ public class CoupleServiceImpl implements CoupleService{
             throw new IllegalStateException("Failed to generate couple ID");
         }
 
-        userService.updateCoupleId(couple.getManId(), coupleId);
-        userService.updateCoupleId(couple.getWomanId(), coupleId);
+        userService.updateCoupleId(couple.getManId(), coupleId, null);
+        userService.updateCoupleId(couple.getWomanId(), coupleId, null);
 
         return couple;
     }
@@ -113,7 +117,10 @@ public class CoupleServiceImpl implements CoupleService{
         CoupleStatusType statusType =  StatusConverter.getCoupleStatusType(coupleInfo.getStatus());
         ApprovalStatusType approvalType = StatusConverter.getApprovalStatusType(coupleStatusRequest.getApprovalStatusType());
 
-        coupleInfo.setUpdateUserId(coupleStatusRequest.getUpdateUserId());
+        Long updateUserId = coupleStatusRequest.getUpdateUserId();
+        boolean isSender = coupleInfo.getUpdateUserId() == updateUserId;
+
+        coupleInfo.setUpdateUserId(updateUserId);
 
 
         switch (statusType) {
@@ -123,22 +130,26 @@ public class CoupleServiceImpl implements CoupleService{
                 return ResultStatus.SUCCESS;
             case REJECT:
                 coupleMapper.deleteCoupleByCoupleId(coupleId);
-                userService.updateCoupleId(coupleInfo.getManId(), null);
-                userService.updateCoupleId(coupleInfo.getWomanId(), null);
+                userService.updateCoupleId(coupleInfo.getManId(), null, coupleId);
+                userService.updateCoupleId(coupleInfo.getWomanId(), null, coupleId);
                 return ResultStatus.SUCCESS;
             case APPROVAL: 
-                coupleInfo.setStatus("04");
+                coupleInfo.setStatus(isSender ? "04" : "06"); // isSender면 승인한 사람이고 승인한 사람은 이별을 요청할수있고, isSender가 아니면 신청한 사람이므로 신청한사람이 확인하면 CONFIRMED로 상태 변경
                 coupleMapper.updateCoupleStatus(coupleInfo);
                 return ResultStatus.SUCCESS;
             case BREAKUP: 
                 coupleInfo.setStatus("05");
                 coupleMapper.updateCoupleStatus(coupleInfo);
+                userService.updateCoupleId(coupleInfo.getManId(), null, coupleId);
+                userService.updateCoupleId(coupleInfo.getWomanId(), null, coupleId);
                 return ResultStatus.SUCCESS;
             case TERMINATED: // 사용자가 이별을 선언한 상태 => 상대방이 확인 하면 종료상태로 변경됨
                 coupleInfo.setStatus("03");
                 coupleMapper.updateCoupleStatus(coupleInfo);
-                userService.updateCoupleId(coupleInfo.getManId(), null);
-                userService.updateCoupleId(coupleInfo.getWomanId(), null);
+                return ResultStatus.SUCCESS;
+            case CONFIRMED: 
+                coupleInfo.setStatus("04");
+                coupleMapper.updateCoupleStatus(coupleInfo);
                 return ResultStatus.SUCCESS;
             default:
                 return ResultStatus.FAIL;
@@ -157,6 +168,20 @@ public class CoupleServiceImpl implements CoupleService{
         CoupleStatusType statusType =  StatusConverter.getCoupleStatusType(detail.getStatus());
 
 
-        return statusType == CoupleStatusType.APPROVAL ? detail : null;
+        return statusType == CoupleStatusType.APPROVAL || statusType == CoupleStatusType.CONFIRMED ? detail : null;
+    }
+
+    public ResultStatus updateCoupleDesc(Long coupleId, CoupleStatusRequest coupleStatusRequest) throws Exception {
+        if(coupleId == null || coupleStatusRequest == null || coupleStatusRequest.getUpdateUserId() == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        Couple couple = new Couple();
+        couple.setCoupleId(coupleId);
+        couple.setUpdateUserId(coupleStatusRequest.getUpdateUserId());
+        couple.setCoupleDesc(coupleStatusRequest.getCoupleDesc());
+
+        coupleMapper.updateCoupleDesc(couple);
+
+        return ResultStatus.SUCCESS;
     }
 }

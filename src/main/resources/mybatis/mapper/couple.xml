@@ -27,7 +27,8 @@
 			couple_id as "coupleId",
 			man_id as "manId",
 			woman_id as "womanId",
-            status
+            status,
+			update_user_id as "updateUserId"
         FROM couple
         WHERE couple_id = #{coupleId}
 	</select>
@@ -41,6 +42,15 @@
 		UPDATE couple
 		SET 
 			status = #{status},
+			update_user_id=#{updateUserId},
+			update_date_time = now()
+		WHERE couple_id = #{coupleId};
+	</update>
+
+	<update id="updateCoupleDesc" parameterType="com.couple.back.model.Couple">
+		UPDATE couple
+		SET 
+			couple_desc = #{coupleDesc},
 			update_user_id=#{updateUserId},
 			update_date_time = now()
 		WHERE couple_id = #{coupleId};

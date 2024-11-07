@@ -13,4 +13,5 @@ public interface CoupleMapper {
     public Couple selectCoupleByCoupleId(Long coupleId);
     public void deleteCoupleByCoupleId(Long coupleId);
     public void updateCoupleStatus(Couple couple);
+    public void updateCoupleDesc(Couple couple);
 }

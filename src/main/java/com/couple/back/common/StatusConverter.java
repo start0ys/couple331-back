@@ -7,7 +7,7 @@ import com.couple.back.model.User;
 
 public class StatusConverter {
     public static enum GenderType {MAN, WOMAN};
-    public static enum CoupleStatusType {REQUEST, REJECT, APPROVAL, BREAKUP, TERMINATED};
+    public static enum CoupleStatusType {REQUEST, REJECT, APPROVAL, CONFIRMED, BREAKUP, TERMINATED};
     public static enum ApprovalStatusType  {APPROVE, REJECT};
 
     public static GenderType getGenderType(User user) {
@@ -40,12 +40,14 @@ public class StatusConverter {
                 return CoupleStatusType.REQUEST;
             case "02": // 상대방이 거절한 상태
                 return CoupleStatusType.REJECT;
-            case "03": // 수락 후 확인을 거쳐 정식 커플이 된 상태
+            case "03": // 수락하여 정식 커플이 된 상태
                 return CoupleStatusType.APPROVAL;
             case "04": // 사용자가 이별을 선언한 상태 => 상대방이 확인 하면 종료상태로 변경됨
                 return CoupleStatusType.BREAKUP;
             case "05": // 종료상태  => 추후 다시 동일 계정끼리 신청이되어 수락되면 다시 상태가 03로 변경
                 return CoupleStatusType.TERMINATED;
+            case "06": // 수락하여 정식 커플이 된 상태를 처음 신청한 사람이 확인한 상태
+                return CoupleStatusType.CONFIRMED;
             default:
                 return null;
         }
