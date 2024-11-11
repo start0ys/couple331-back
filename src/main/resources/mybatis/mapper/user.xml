@@ -77,7 +77,7 @@
 		LEFT OUTER JOIN couple c
 		ON u.couple_id = c.couple_id
 		WHERE 
-		COALESCE(c.status, '') NOT IN ('01', '03')
+		COALESCE(c.status, '') NOT IN ('01', '03', '06')
 		AND gender = #{gender};
 	</select>
 
