@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.couple.back.mybatis.ScheduleMapper">
+
+	<resultMap id="TodoResultMap" type="com.couple.back.model.Todo">
+		<result property="id" column="id"/>
+		<result property="todo" column="todo"/>
+		<result property="completedYn" column="completedYn"/>
+		<result property="day" column="day"/>
+		<result property="createUserId" column="createUserId"/>
+		<result property="dayOrder" column="dayOrder"/>
+	</resultMap>
+
+	<resultMap id="GroupedTodos" type="com.couple.back.dto.GroupedTodos">
+		<result property="day" column="day"/>
+		<collection property="todos" ofType="com.couple.back.model.Todo" resultMap="TodoResultMap"/>
+	</resultMap>
+
+
+	<insert id="insertCalendar" parameterType="com.couple.back.model.Calendar">
+		INSERT INTO calendar(id, title, start_day, end_day, color, text_color, type, couple_id, user_id, create_user_id, update_user_id)
+		VALUES (#{id}, #{title}, #{startDay}, #{endDay}, #{color}, #{textColor}, #{type}, #{coupleId}, #{userId}, #{createUserId}, #{updateUserId});
+	</insert>
+
+	<insert id="insertTodo" parameterType="com.couple.back.model.Todo">
+		INSERT INTO todo(id, todo, completed_yn, day, create_user_id, update_user_id, day_order)
+		VALUES (#{id}, #{todo}, #{completedYn}, #{day}, #{createUserId}, #{updateUserId}, #{dayOrder});
+	</insert>
+
+	
+	<update id="updateTodo" parameterType="com.couple.back.model.Todo">
+		UPDATE todo
+		SET 
+			<if test="todo != null and todo != ''">todo=#{todo},</if>
+			<if test="completedYn != null and completedYn != ''">completed_yn=#{completedYn},</if>
+			<if test="updateUserId != null">update_user_id=#{updateUserId},</if>
+			update_date_time = now()
+		WHERE id = #{id};
+	</update>
+
+	<delete id="deleteTodo" parameterType="String">
+		DELETE FROM todo
+ 		WHERE id = #{id};
+	</delete>
+
+	<select id="selectGroupedTodosByCreateId" parameterType="Long" resultMap="GroupedTodos">
+		select
+			id,
+			todo,
+			completed_yn as "completedYn",
+			day,
+			create_user_id as "createUserId",
+			day_order as "dayOrder"
+		from todo
+		where create_user_id = #{id}
+		order by day, day_order
+	</select>
+
+
+    <!--
+	<select id="selectCoupleStatusDetailByCoupleId" parameterType="Long" resultType="com.couple.back.dto.CoupleStatusDetail" >
+	    SELECT
+            c.status,
+            c.update_user_id as "updateUserId",
+            m.name as "manName",
+            w.name as "womanName",
+			c.start_date as "startDate",
+			c.couple_desc as "coupleDesc"
+        FROM couple c
+        INNER JOIN users m
+        ON c.man_id = m.user_id
+        INNER JOIN users w
+        ON c.woman_id = w.user_id
+        WHERE c.couple_id = #{coupleId}
+	</select>
+
+	<select id="selectCoupleByCoupleId" parameterType="Long" resultType="com.couple.back.model.Couple" >
+	    SELECT
+			couple_id as "coupleId",
+			man_id as "manId",
+			woman_id as "womanId",
+            status,
+			update_user_id as "updateUserId"
+        FROM couple
+        WHERE couple_id = #{coupleId}
+	</select>
+
+	<delete id="deleteCoupleByCoupleId" parameterType="Long">
+		DELETE FROM couple
+ 		WHERE couple_id = #{coupleId};
+	</delete>
+
+	<update id="updateCoupleStatus" parameterType="com.couple.back.model.Couple">
+		UPDATE couple
+		SET 
+			status = #{status},
+			update_user_id=#{updateUserId},
+			update_date_time = now()
+		WHERE couple_id = #{coupleId};
+	</update>
+
+	<update id="updateCoupleDesc" parameterType="com.couple.back.model.Couple">
+		UPDATE couple
+		SET 
+			couple_desc = #{coupleDesc},
+			update_user_id=#{updateUserId},
+			update_date_time = now()
+		WHERE couple_id = #{coupleId};
+	</update> -->
+
+	
+</mapper>
