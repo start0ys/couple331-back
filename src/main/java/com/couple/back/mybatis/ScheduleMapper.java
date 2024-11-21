@@ -15,4 +15,5 @@ public interface ScheduleMapper {
     public void updateTodo(Todo todo);
     public void deleteTodo(String id);
     public List<GroupedTodos> selectGroupedTodosByCreateId(Long id);
+    public List<Calendar> selectCalendarsByUserId(Long id);
 }

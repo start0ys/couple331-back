@@ -68,4 +68,11 @@ public class ScheduleServiceImpl implements ScheduleService{
 
         return map;
     }
+
+    public List<Calendar> getCalender(Long userId) throws Exception {
+        if(userId == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        return scheduleMapper.selectCalendarsByUserId(userId);
+    }
 }

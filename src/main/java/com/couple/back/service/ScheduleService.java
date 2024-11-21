@@ -12,4 +12,5 @@ public interface ScheduleService {
     public void updateTodo(Todo todo) throws Exception;
     public void deleteTodo(String id) throws Exception;
     public Map<String, List<Todo>> getTodo(Long userId) throws Exception;
+    public List<Calendar> getCalender(Long userId) throws Exception;
 }
