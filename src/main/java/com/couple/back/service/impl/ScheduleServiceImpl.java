@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.couple.back.dto.CalendarRequest;
 import com.couple.back.dto.GroupedTodos;
 import com.couple.back.model.Calendar;
 import com.couple.back.model.Todo;
@@ -20,6 +21,13 @@ public class ScheduleServiceImpl implements ScheduleService{
     @Autowired
     private ScheduleMapper scheduleMapper;
 
+    public List<Calendar> getCalender(Long userId, String type) throws Exception {
+        if(userId == null)
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        return scheduleMapper.selectCalendars(new CalendarRequest(userId, type));
+    }
+
     public void registerCalendar(Calendar calendar) throws Exception {
         if(calendar == null || StringUtils.isEmpty(calendar.getId()) || calendar.getUserId() == null || calendar.getCreateUserId() == null) 
             throw new IllegalArgumentException("Parameter is Empty");
@@ -27,25 +35,18 @@ public class ScheduleServiceImpl implements ScheduleService{
         scheduleMapper.insertCalendar(calendar);
     }
 
-    public void registerTodo(Todo todo) throws Exception {
-        if(todo == null || StringUtils.isEmpty(todo.getId()) || todo.getCreateUserId() == null) 
-            throw new IllegalArgumentException("Parameter is Empty");
-            
-        scheduleMapper.insertTodo(todo);
-    }
-
-    public void updateTodo(Todo todo) throws Exception {
-        if(todo == null || StringUtils.isEmpty(todo.getId()))
+    public void updateCalendar(String id, Calendar calendar) throws Exception {
+        if(StringUtils.isAnyEmpty(id, calendar.getId()) || !StringUtils.equals(id, calendar.getId()))
             throw new IllegalArgumentException("Parameter is Empty");
 
-        scheduleMapper.updateTodo(todo);
+        scheduleMapper.updateCalendar(calendar);
     }
 
-    public void deleteTodo(String id) throws Exception {
+    public void deleteCalender(String id) throws Exception {
         if(StringUtils.isEmpty(id))
             throw new IllegalArgumentException("Parameter is Empty");
 
-        scheduleMapper.deleteTodo(id);
+        scheduleMapper.deleteCalender(id);
     }
 
     public Map<String, List<Todo>> getTodo(Long userId) throws Exception {
@@ -69,10 +70,24 @@ public class ScheduleServiceImpl implements ScheduleService{
         return map;
     }
 
-    public List<Calendar> getCalender(Long userId) throws Exception {
-        if(userId == null)
+    public void registerTodo(Todo todo) throws Exception {
+        if(todo == null || StringUtils.isEmpty(todo.getId()) || todo.getCreateUserId() == null) 
+            throw new IllegalArgumentException("Parameter is Empty");
+            
+        scheduleMapper.insertTodo(todo);
+    }
+
+    public void updateTodo(Todo todo) throws Exception {
+        if(todo == null || StringUtils.isEmpty(todo.getId()))
             throw new IllegalArgumentException("Parameter is Empty");
 
-        return scheduleMapper.selectCalendarsByUserId(userId);
+        scheduleMapper.updateTodo(todo);
+    }
+
+    public void deleteTodo(String id) throws Exception {
+        if(StringUtils.isEmpty(id))
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        scheduleMapper.deleteTodo(id);
     }
 }
