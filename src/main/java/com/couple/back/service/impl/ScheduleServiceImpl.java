@@ -36,7 +36,7 @@ public class ScheduleServiceImpl implements ScheduleService{
     }
 
     public void updateCalendar(String id, Calendar calendar) throws Exception {
-        if(StringUtils.isAnyEmpty(id, calendar.getId()) || !StringUtils.equals(id, calendar.getId()))
+        if(calendar == null || StringUtils.isAnyEmpty(id, calendar.getId()) || !StringUtils.equals(id, calendar.getId()))
             throw new IllegalArgumentException("Parameter is Empty");
 
         scheduleMapper.updateCalendar(calendar);
