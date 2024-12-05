@@ -5,6 +5,8 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.couple.back.dto.BoardCommentDetail;
+import com.couple.back.dto.BoardDetail;
 import com.couple.back.model.Board;
 import com.couple.back.model.BoardComment;
 
@@ -12,9 +14,9 @@ import com.couple.back.model.BoardComment;
 public interface BoardMapper {
     public List<Board> selectBoardDatas(Map<String, Object> param);
     public int totalBoardCount(Map<String, Object> param);
-    public Board selectBoardData(Long boardId);
-    public List<BoardComment> selectCommentDatas(Map<String, Object> param);
-    public int totalCommentCount(Map<String, Object> param);
+    public BoardDetail selectBoardData(Long boardId);
+    public List<BoardCommentDetail> selectCommentDatas(Map<String, Object> param);
+    public int totalCommentCount(Long boardId);
     public void insertBoard(Board board);
     public void updateBoard(Board board);
     public void deleteBoard(Long boardId);
@@ -22,4 +24,5 @@ public interface BoardMapper {
     public void insertComment(BoardComment comment);
     public void updateComment(BoardComment comment);
     public void deleteComment(Long commentId);
+    public void deleteCommentByBoarId(Long boardId);
 }

@@ -60,6 +60,122 @@
         </where>
     </select>
 
-	
+    <select id="selectBoardDatas" parameterType="long" resultType="com.couple.back.dto.BoardDetail" >
+	    SELECT
+            b.board_id as "boardId",
+            b.category,
+            b.title,
+            b.create_date_time as "createDateTime",
+            b.content,
+            u.name as "author"
+        FROM board b
+        INNER JOIN users u
+        ON b.create_user_id = u.user_id
+        WHERE b.board_id = #{boardId}
+	</select>
+
+    <select id="selectCommentDatas" parameterType="map" resultType="com.couple.back.dto.BoardCommentDetail" >
+	    WITH RECURSIVE commentHierarchy AS (
+            SELECT 
+                comment_id,
+                board_id,
+                parent_id,
+                content,
+                create_date_time,
+                create_user_id,
+                1 AS level,
+                comment_id AS root_comment_id,
+                create_user_id AS "parent_create_user_id"
+            FROM board_comment
+            WHERE board_id = #{boardId} 
+            AND parent_id IS NULL
+
+            UNION ALL
+
+            SELECT 
+                c.comment_id,
+                c.board_id,
+                c.parent_id,
+                c.content,
+                c.create_date_time,
+                c.create_user_id,
+                ch.level + 1 AS level,
+                ch.root_comment_id,
+                ch.parent_create_user_id
+            FROM board_comment c
+            INNER JOIN commentHierarchy ch
+            ON c.parent_id = ch.comment_id
+        )
+        
+        SELECT 
+            c.comment_id as "commentId",
+            c.board_id as "boardId",
+            c.parent_id as "parentId",
+            c.content as "content",
+            c.create_date_time "createDateTime",
+            u.name as "author",
+            p.name as "parentAuthor"
+        FROM commentHierarchy c
+        INNER JOIN users u
+        ON c.create_user_id = u.user_id
+        INNER JOIN users p
+        ON c.parent_create_user_id = u.user_id
+        ORDER BY c.root_comment_id, c.level, c.comment_id
+        LIMIT #{limit} OFFSET #{offset}
+	</select>
+
+    
+    <select id="totalCommentCount" parameterType="long" resultType="int">
+        SELECT COUNT(*)
+        FROM board_comment c
+        INNER JOIN users u
+        ON c.create_user_id = u.user_id
+        WHERE c.board_id = #{boardId}
+    </select>
+
+    <insert id="insertBoard" parameterType="com.couple.back.model.Board">
+        INSERT INTO board(board_id, category, title, content, create_user_id, update_user_id)
+		VALUES (#{boardId}, #{category}, #{title}, #{content}, #{createUserId}, #{updateUserId});
+    </insert>
+
+    <update id="updateBoard" parameterType="com.couple.back.model.Board">
+		UPDATE board
+		SET 
+			category = #{category},
+            title = #{title},
+            content = #{content},
+			update_user_id=#{updateUserId},
+			update_date_time = now()
+		WHERE board_id = #{boardId};
+	</update>
+
+    <delete id="deleteBoard" parameterType="Long">
+		DELETE FROM board
+ 		WHERE board_id = #{boardId};
+	</delete>
+
+    <insert id="insertComment" parameterType="com.couple.back.model.BoardComment">
+        INSERT INTO board_comment(comment_id, parent_id, content, board_id, create_user_id, update_user_id)
+		VALUES (#{commentId}, #{parentId}, #{content}, #{boardId}, #{createUserId}, #{updateUserId});
+    </insert>
+
+    <update id="updateComment" parameterType="com.couple.back.model.BoardComment">
+		UPDATE board_comment
+		SET 
+            content = #{content},
+			update_user_id=#{updateUserId},
+			update_date_time = now()
+		WHERE comment_id = #{commentId};
+	</update>
+
+    <delete id="deleteComment" parameterType="Long">
+		DELETE FROM board_comment
+ 		WHERE comment_id = #{commentId};
+	</delete>
+
+    <delete id="deleteCommentByBoarId" parameterType="Long">
+		DELETE FROM board_comment
+ 		WHERE board_id = #{boardId};
+	</delete>
 
 </mapper>

@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class BoardDetailResponse {
-    private Board board;
-    private Page<BoardComment> comments;
+    private BoardDetail board;
+    private Page<BoardCommentDetail> comments;
 }

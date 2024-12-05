@@ -11,6 +11,8 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.couple.back.dto.BoardCommentDetail;
+import com.couple.back.dto.BoardDetail;
 import com.couple.back.dto.BoardDetailResponse;
 import com.couple.back.model.Board;
 import com.couple.back.model.BoardComment;
@@ -45,7 +47,7 @@ public class BoardServiceImpl implements BoardService{
         if(boardId == null)
             throw new IllegalArgumentException("Parameter is Empty");
 
-        Board board = boardMapper.selectBoardData(boardId);
+        BoardDetail board = boardMapper.selectBoardData(boardId);
         if(board == null)
             throw new IllegalArgumentException("Board is Empty");
 
@@ -57,10 +59,10 @@ public class BoardServiceImpl implements BoardService{
         param.put("limit", limit);
         param.put("offset", offset);
 
-        List<BoardComment> datas = boardMapper.selectCommentDatas(param);
-        int totalCount = boardMapper.totalCommentCount(param);
+        List<BoardCommentDetail> datas = boardMapper.selectCommentDatas(param);
+        int totalCount = boardMapper.totalCommentCount(boardId);
 
-        Page<BoardComment> comments = new PageImpl<>(datas, pageable, totalCount);
+        Page<BoardCommentDetail> comments = new PageImpl<>(datas, pageable, totalCount);
         
         return new BoardDetailResponse(board, comments);
     }
