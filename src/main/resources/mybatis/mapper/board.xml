@@ -60,7 +60,7 @@
         </where>
     </select>
 
-    <select id="selectBoardDatas" parameterType="long" resultType="com.couple.back.dto.BoardDetail" >
+    <select id="selectBoardData" parameterType="long" resultType="com.couple.back.dto.BoardDetail" >
 	    SELECT
             b.board_id as "boardId",
             b.category,
