@@ -12,7 +12,7 @@ import com.couple.back.model.BoardComment;
 
 @Mapper
 public interface BoardMapper {
-    public List<Board> selectBoardDatas(Map<String, Object> param);
+    public List<BoardDetail> selectBoardDatas(Map<String, Object> param);
     public int totalBoardCount(Map<String, Object> param);
     public BoardDetail selectBoardData(Long boardId);
     public List<BoardCommentDetail> selectCommentDatas(Map<String, Object> param);

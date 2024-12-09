@@ -3,7 +3,7 @@
 <mapper namespace="com.couple.back.mybatis.BoardMapper">
 
 
-	<select id="selectBoardDatas" parameterType="map" resultType="com.couple.back.model.Board" >
+	<select id="selectBoardDatas" parameterType="map" resultType="com.couple.back.dto.BoardDetail" >
 	    SELECT
             b.board_id as "boardId",
             b.category,
@@ -11,10 +11,11 @@
             b.create_date_time as "createDateTime",
 			b.create_user_id as "createUserId", 
 			b.update_date_time as "updateDateTime",
-			b.update_user_id as "updateUserId"
-            <if test="includeClobDataYn != null and includeClobDataYn == 'Y'">
+			b.update_user_id as "updateUserId",
+            u.name as "author"
+            <!-- <if test="includeClobDataYn != null and includeClobDataYn == 'Y'">
                 ,b.content
-            </if>
+            </if> -->
         FROM board b
         INNER JOIN users u
         ON b.create_user_id = u.user_id
@@ -28,7 +29,7 @@
                         AND UPPER(b.category) LIKE UPPER('%' || #{searchWord} || '%')
                     </when>
                     <when  test="searchType == 'author'">
-                        AND UPPER(u.user_id) LIKE UPPER('%' || #{searchWord} || '%')
+                        AND UPPER(u.name) LIKE UPPER('%' || #{searchWord} || '%')
                     </when>
                 </choose>
             </if>
@@ -53,7 +54,7 @@
                         AND UPPER(b.category) LIKE UPPER('%' || #{searchWord} || '%')
                     </when>
                     <when  test="searchType == 'author'">
-                        AND UPPER(u.user_id) LIKE UPPER('%' || #{searchWord} || '%')
+                        AND UPPER(u.name) LIKE UPPER('%' || #{searchWord} || '%')
                     </when>
                 </choose>
             </if>
@@ -133,9 +134,9 @@
         WHERE c.board_id = #{boardId}
     </select>
 
-    <insert id="insertBoard" parameterType="com.couple.back.model.Board">
-        INSERT INTO board(board_id, category, title, content, create_user_id, update_user_id)
-		VALUES (#{boardId}, #{category}, #{title}, #{content}, #{createUserId}, #{updateUserId});
+    <insert id="insertBoard" parameterType="com.couple.back.model.Board" useGeneratedKeys="true" keyProperty="boardId" keyColumn="board_id">
+        INSERT INTO board(category, title, content, create_user_id, update_user_id)
+		VALUES (#{category}, #{title}, #{content}, #{createUserId}, #{updateUserId});
     </insert>
 
     <update id="updateBoard" parameterType="com.couple.back.model.Board">
@@ -155,8 +156,8 @@
 	</delete>
 
     <insert id="insertComment" parameterType="com.couple.back.model.BoardComment">
-        INSERT INTO board_comment(comment_id, parent_id, content, board_id, create_user_id, update_user_id)
-		VALUES (#{commentId}, #{parentId}, #{content}, #{boardId}, #{createUserId}, #{updateUserId});
+        INSERT INTO board_comment(parent_id, content, board_id, create_user_id, update_user_id)
+		VALUES (#{parentId}, #{content}, #{boardId}, #{createUserId}, #{updateUserId});
     </insert>
 
     <update id="updateComment" parameterType="com.couple.back.model.BoardComment">

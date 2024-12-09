@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.dto.BoardDetail;
 import com.couple.back.dto.BoardDetailResponse;
 import com.couple.back.model.Board;
 import com.couple.back.model.BoardComment;
@@ -34,12 +35,12 @@ public class BoardController {
     private BoardService boardService;
 
     @GetMapping("/")
-    public ResponseEntity<ApiResponse<Page<Board>>> getBoardList(@RequestParam(value = "searchWord", required = false, defaultValue="") String searchWord 
+    public ResponseEntity<ApiResponse<Page<BoardDetail>>> getBoardList(@RequestParam(value = "searchWord", required = false, defaultValue="") String searchWord 
         , @RequestParam(value = "searchType", required = false, defaultValue="title") String searchType
         , @RequestParam(value = "includeClobDataYn", required = false, defaultValue="N") String includeClobDataYn
         , final Pageable pageable) {
         try {
-            Page<Board> result = boardService.getBoardList(searchType, searchWord, includeClobDataYn, pageable);
+            Page<BoardDetail> result = boardService.getBoardList(searchType, searchWord, includeClobDataYn, pageable);
             if(result == null) {
                 return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
             }
@@ -71,10 +72,13 @@ public class BoardController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<String>> registerBoard(@RequestBody Board saveData)  {
+    public ResponseEntity<ApiResponse<Board>> registerBoard(@RequestBody Board saveData)  {
         try {
-            boardService.registerBoard(saveData);
-            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
+            Board board = boardService.registerBoard(saveData);
+            if(board == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, board), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : registerBoard / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);

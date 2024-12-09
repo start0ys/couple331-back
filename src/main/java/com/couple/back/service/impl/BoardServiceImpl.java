@@ -25,7 +25,7 @@ public class BoardServiceImpl implements BoardService{
     @Autowired
     private BoardMapper boardMapper;
 
-    public Page<Board> getBoardList(String searchType, String searchWord, String includeClobDataYn, Pageable pageable) throws Exception {
+    public Page<BoardDetail> getBoardList(String searchType, String searchWord, String includeClobDataYn, Pageable pageable) throws Exception {
 
         int offset = (int) pageable.getOffset();
         int limit = pageable.getPageSize();
@@ -37,7 +37,7 @@ public class BoardServiceImpl implements BoardService{
         param.put("limit", limit);
         param.put("offset", offset);
 
-        List<Board> datas = boardMapper.selectBoardDatas(param);
+        List<BoardDetail> datas = boardMapper.selectBoardDatas(param);
         int totalCount = boardMapper.totalBoardCount(param);
 
         return new PageImpl<>(datas, pageable, totalCount);
@@ -67,11 +67,13 @@ public class BoardServiceImpl implements BoardService{
         return new BoardDetailResponse(board, comments);
     }
 
-    public void registerBoard(Board board) throws Exception {
+    public Board registerBoard(Board board) throws Exception {
         if(board == null || StringUtils.isAnyEmpty(board.getCategory(), board.getTitle()) || board.getCreateUserId() == null) 
             throw new IllegalArgumentException("Parameter is Empty");
 
         boardMapper.insertBoard(board);
+
+        return board;
     }
 
     public void updateBoard(Long boardId, Board board) throws Exception {
