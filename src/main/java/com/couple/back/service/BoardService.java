@@ -3,6 +3,7 @@ package com.couple.back.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import com.couple.back.dto.BoardCommentDetail;
 import com.couple.back.dto.BoardDetail;
 import com.couple.back.dto.BoardDetailResponse;
 import com.couple.back.model.Board;
@@ -15,7 +16,8 @@ public interface BoardService {
     public void updateBoard(Long boardId, Board board) throws Exception;
     public void deleteBoard(Long boardId) throws Exception;
 
-    public void registerComment(Long boardId, BoardComment comment) throws Exception;
+    public Page<BoardCommentDetail> getBoardCommentList(Long boardId, Pageable pageable) throws Exception;
+    public BoardComment registerComment(Long boardId, BoardComment comment) throws Exception;
     public void updateComment(Long commentId, BoardComment comment) throws Exception;
     public void deleteComment(Long commentId) throws Exception;
 }

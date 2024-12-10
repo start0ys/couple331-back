@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.dto.BoardCommentDetail;
 import com.couple.back.dto.BoardDetail;
 import com.couple.back.dto.BoardDetailResponse;
 import com.couple.back.model.Board;
@@ -116,12 +117,32 @@ public class BoardController {
         }
     }
 
+    @GetMapping("/{boardId}/comment")
+    public ResponseEntity<ApiResponse<Page<BoardCommentDetail>>> getBoardCommentList(@PathVariable Long boardId, final Pageable pageable) {
+        try {
+            Page<BoardCommentDetail> result = boardService.getBoardCommentList(boardId, pageable);
+            if(result == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, result), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : getBoardCommentList / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : getBoardCommentList / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     @PostMapping("/{boardId}/comment/register")
-    public ResponseEntity<ApiResponse<String>> registerComment(@PathVariable Long boardId, @RequestBody BoardComment saveData)  {
+    public ResponseEntity<ApiResponse<BoardComment>> registerComment(@PathVariable Long boardId, @RequestBody BoardComment saveData)  {
         try {
-            boardService.registerComment(boardId, saveData);
-            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, null), HttpStatus.OK);
+            BoardComment boardComment = boardService.registerComment(boardId, saveData);
+            if(boardComment == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, boardComment), HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : registerComment / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);

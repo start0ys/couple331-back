@@ -120,7 +120,7 @@
         INNER JOIN users u
         ON c.create_user_id = u.user_id
         INNER JOIN users p
-        ON c.parent_create_user_id = u.user_id
+        ON c.parent_create_user_id = p.user_id
         ORDER BY c.root_comment_id, c.level, c.comment_id
         LIMIT #{limit} OFFSET #{offset}
 	</select>
@@ -155,7 +155,7 @@
  		WHERE board_id = #{boardId};
 	</delete>
 
-    <insert id="insertComment" parameterType="com.couple.back.model.BoardComment">
+    <insert id="insertComment" parameterType="com.couple.back.model.BoardComment" useGeneratedKeys="true" keyProperty="commentId,createDateTime" keyColumn="comment_id,create_date_time">
         INSERT INTO board_comment(parent_id, content, board_id, create_user_id, update_user_id)
 		VALUES (#{parentId}, #{content}, #{boardId}, #{createUserId}, #{updateUserId});
     </insert>

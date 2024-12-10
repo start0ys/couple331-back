@@ -51,18 +51,7 @@ public class BoardServiceImpl implements BoardService{
         if(board == null)
             throw new IllegalArgumentException("Board is Empty");
 
-        int offset = (int) pageable.getOffset();
-        int limit = pageable.getPageSize();
-
-        Map<String, Object> param = new HashMap<>();
-        param.put("boardId", boardId);
-        param.put("limit", limit);
-        param.put("offset", offset);
-
-        List<BoardCommentDetail> datas = boardMapper.selectCommentDatas(param);
-        int totalCount = boardMapper.totalCommentCount(boardId);
-
-        Page<BoardCommentDetail> comments = new PageImpl<>(datas, pageable, totalCount);
+        Page<BoardCommentDetail> comments = getBoardCommentList(boardId, pageable);
         
         return new BoardDetailResponse(board, comments);
     }
@@ -90,11 +79,29 @@ public class BoardServiceImpl implements BoardService{
         boardMapper.deleteBoard(boardId);
     }
 
-    public void registerComment(Long boardId, BoardComment comment) throws Exception {
+    public Page<BoardCommentDetail> getBoardCommentList(Long boardId, Pageable pageable) throws Exception {
+
+        int offset = (int) pageable.getOffset();
+        int limit = pageable.getPageSize();
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("boardId", boardId);
+        param.put("limit", limit);
+        param.put("offset", offset);
+
+        List<BoardCommentDetail> datas = boardMapper.selectCommentDatas(param);
+        int totalCount = boardMapper.totalCommentCount(boardId);
+
+        return new PageImpl<>(datas, pageable, totalCount);
+    }
+
+    public BoardComment registerComment(Long boardId, BoardComment comment) throws Exception {
         if(comment == null || boardId == null || comment.getBoardId() != boardId || StringUtils.isEmpty(comment.getContent())) 
             throw new IllegalArgumentException("Parameter is Empty");
 
         boardMapper.insertComment(comment);
+
+        return comment;
     }
 
     public void updateComment(Long commentId, BoardComment comment) throws Exception {
