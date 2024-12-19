@@ -84,9 +84,9 @@
                 content,
                 create_date_time,
                 create_user_id,
-                1 AS level,
+                ARRAY[comment_id] AS path,
                 comment_id AS root_comment_id,
-                create_user_id AS "parent_create_user_id"
+                -1::bigInt AS "parent_create_user_id"
             FROM board_comment
             WHERE board_id = #{boardId} 
             AND parent_id IS NULL
@@ -100,9 +100,9 @@
                 c.content,
                 c.create_date_time,
                 c.create_user_id,
-                ch.level + 1 AS level,
+                ch.path || c.comment_id AS path,
                 ch.root_comment_id,
-                ch.parent_create_user_id
+                ch.create_user_id AS "parent_create_user_id"
             FROM board_comment c
             INNER JOIN commentHierarchy ch
             ON c.parent_id = ch.comment_id
@@ -117,11 +117,11 @@
             u.name as "author",
             p.name as "parentAuthor"
         FROM commentHierarchy c
-        INNER JOIN users u
+        LEFT OUTER JOIN users u
         ON c.create_user_id = u.user_id
-        INNER JOIN users p
+        LEFT OUTER JOIN users p
         ON c.parent_create_user_id = p.user_id
-        ORDER BY c.root_comment_id, c.level, c.comment_id
+        ORDER BY c.path
         LIMIT #{limit} OFFSET #{offset}
 	</select>
 
