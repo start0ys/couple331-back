@@ -107,4 +107,27 @@
  		WHERE id = #{id};
 	</delete>
 
+	<select id="findDetailScheduleByDay" parameterType="String" resultType="com.couple.back.dto.ScheduleDetailResponse">
+		SELECT 
+			COALESCE(couple_id, -1) as type,
+			title,
+			'N' as completedYn
+		FROM calendar 
+		WHERE 
+		( start_day = #{day} AND end_day = #{day})
+		OR
+		<![CDATA[
+		(start_day <= #{day} AND end_day > #{day})
+		]]>
+
+		UNION ALL
+
+		SELECT
+			-2 as type,
+			todo,
+			completed_yn as completedYn
+		FROM todo 
+		WHERE day = #{day}
+	</select>
+
 </mapper>

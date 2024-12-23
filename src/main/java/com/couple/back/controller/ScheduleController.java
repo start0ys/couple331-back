@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.couple.back.common.ApiResponse;
 import com.couple.back.common.ApiResponseUtil;
 import com.couple.back.common.CommonConstants;
+import com.couple.back.dto.ScheduleDetailResponse;
 import com.couple.back.model.Calendar;
 import com.couple.back.model.Todo;
 import com.couple.back.service.ScheduleService;
@@ -147,6 +148,23 @@ public class ScheduleController {
             return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
         } catch (Exception e) {
             log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : deleteTodo / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("schedule/detail/{day}")
+    public ResponseEntity<ApiResponse<List<ScheduleDetailResponse>>> getDetailScheduleByDay(@PathVariable String day) {
+        try {
+            List<ScheduleDetailResponse> result = scheduleService.getDetailScheduleByDay(day);
+            if(result == null) {
+                return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.FAIL_MESSAGE),HttpStatus.BAD_REQUEST); 
+            }
+            return new ResponseEntity<>(ApiResponseUtil.success(CommonConstants.SUCCESS_MESSAGE, result), HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            log.error("Status : " + HttpStatus.BAD_REQUEST + " / Method : getDetailScheduleByDay / Message : " + e.getMessage());
+            return new ResponseEntity<>(ApiResponseUtil.fail(CommonConstants.PARAM_ERROR_MESSAGE),HttpStatus.BAD_REQUEST);
+        } catch (Exception e) {
+            log.error("Status : " + HttpStatus.INTERNAL_SERVER_ERROR + " / Method : getDetailScheduleByDay / Message : " + e.getMessage());
             return new ResponseEntity<>(ApiResponseUtil.error(CommonConstants.ERROR_MESSAGE),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

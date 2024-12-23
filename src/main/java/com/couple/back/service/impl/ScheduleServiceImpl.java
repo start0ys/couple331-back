@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.couple.back.dto.CalendarRequest;
 import com.couple.back.dto.GroupedTodos;
+import com.couple.back.dto.ScheduleDetailResponse;
 import com.couple.back.model.Calendar;
 import com.couple.back.model.Todo;
 import com.couple.back.mybatis.ScheduleMapper;
@@ -89,5 +90,12 @@ public class ScheduleServiceImpl implements ScheduleService{
             throw new IllegalArgumentException("Parameter is Empty");
 
         scheduleMapper.deleteTodo(id);
+    }
+
+    public List<ScheduleDetailResponse> getDetailScheduleByDay(String day) throws Exception {
+        if(StringUtils.isEmpty(day))
+            throw new IllegalArgumentException("Parameter is Empty");
+
+        return scheduleMapper.findDetailScheduleByDay(day);
     }
 }

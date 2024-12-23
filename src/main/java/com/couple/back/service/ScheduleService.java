@@ -3,6 +3,7 @@ package com.couple.back.service;
 import java.util.List;
 import java.util.Map;
 
+import com.couple.back.dto.ScheduleDetailResponse;
 import com.couple.back.model.Calendar;
 import com.couple.back.model.Todo;
 
@@ -15,4 +16,5 @@ public interface ScheduleService {
     public void registerTodo(Todo todo) throws Exception;
     public void updateTodo(Todo todo) throws Exception;
     public void deleteTodo(String id) throws Exception;
+    public List<ScheduleDetailResponse> getDetailScheduleByDay(String day) throws Exception;
 }
